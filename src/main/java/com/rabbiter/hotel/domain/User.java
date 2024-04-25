@@ -24,7 +24,7 @@ public class User {
     private Date createTime = new Date();
     @TableField(value = "email")
     private String email;
-    @TableField(value = "user_name")
+    @TableField(value = "username")
     private String userName;
     @TableField(value = "password")
     private String password;
