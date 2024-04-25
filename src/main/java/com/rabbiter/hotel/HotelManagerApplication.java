@@ -13,4 +13,5 @@ public class HotelManagerApplication {
     public static void main(String[] args) {
         SpringApplication.run(HotelManagerApplication.class, args);
     }
+    //test
 }
