@@ -2,6 +2,7 @@ package com.rabbiter.hotel.controller.user;
 
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
 import com.rabbiter.hotel.domain.User;
@@ -60,7 +61,7 @@ public class UserController {
     public CommonResult<String> login(@RequestBody LoginDTO loginDTO) {
         CommonResult<String> commonResult = new CommonResult<>();
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("email", loginDTO.getEmail());
+        queryWrapper.eq("phone", loginDTO.getPhone());
         String md5Password = SecureUtil.md5(loginDTO.getPassword());
         queryWrapper.eq("password", md5Password);
         User user = userService.getBaseMapper().selectOne(queryWrapper);
@@ -83,6 +84,37 @@ public class UserController {
         return commonResult;
     }
 
+    @PostMapping(value = "/resetpswd")
+    public CommonResult<String> resetpswd(@RequestBody LoginDTO loginDTO) {
+        CommonResult<String> commonResult = new CommonResult<>();
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq("email", loginDTO.getEmail());
+        queryWrapper.eq("phone", loginDTO.getPhone());
+        User user = userService.getBaseMapper().selectOne(queryWrapper);
+
+        if (null != user) {
+
+            WebUtils.getSession().setAttribute("loginUser", user);
+//            System.out.println(WebUtils.getSession().getId());
+
+            String md5OldPassword = SecureUtil.md5(loginDTO.getPassword());
+            user.setPassword(md5OldPassword);
+            userService.updateById(user);
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+
+            commonResult.setData("重置成功");
+        } else {
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+            commonResult.setData("重置失败");
+
+        }
+
+        System.out.println(commonResult);
+        return commonResult;
+    }
+
     @GetMapping("/logout")
     public CommonResult<String> logout(){
         CommonResult<String> commonResult = new CommonResult<>();
@@ -93,6 +125,9 @@ public class UserController {
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         commonResult.setData("登出成功!");
 
+
+
+        System.out.println(commonResult);
         return commonResult;
     }
 
