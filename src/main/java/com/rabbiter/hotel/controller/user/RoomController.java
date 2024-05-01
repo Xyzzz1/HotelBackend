@@ -7,10 +7,7 @@ import com.rabbiter.hotel.domain.Order;
 import com.rabbiter.hotel.domain.Room;
 import com.rabbiter.hotel.domain.Type;
 import com.rabbiter.hotel.domain.User;
-import com.rabbiter.hotel.dto.BookDTO;
-import com.rabbiter.hotel.dto.DateSectionDTO;
-import com.rabbiter.hotel.dto.ReturnRoomDTO;
-import com.rabbiter.hotel.dto.TypeDTO;
+import com.rabbiter.hotel.dto.*;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.service.RoomService;
 import com.rabbiter.hotel.service.TypeService;
@@ -21,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,9 +41,48 @@ public class RoomController {
     private UserService userService;
 
     @PostMapping(value = "/listRoom")
-    public CommonResult<List<ReturnRoomDTO>> listRoom(@RequestBody DateSectionDTO dateSectionDTO) {
+    public CommonResult<List<ReturnRoomDTO>> listRoom(@RequestBody SearchRoomDTO searchRoomDTO) {
         CommonResult<List<ReturnRoomDTO>> commonResult = new CommonResult<>();
+        DateSectionDTO dateSectionDTO = new DateSectionDTO(searchRoomDTO.getInTime(), searchRoomDTO.getLeaveTime());
+        List<ReturnRoomDTO> list = roomService.listRooms(dateSectionDTO);
 
+        String roomType = searchRoomDTO.getRoomType();
+        int maxPeople = searchRoomDTO.getMaxPeople();
+        int minPrice = searchRoomDTO.getMinPrice();
+        int maxPrice = searchRoomDTO.getMaxPrice();
+
+        Iterator<ReturnRoomDTO> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            ReturnRoomDTO returnRoom = iterator.next();
+            if (!roomType.equals("") && !returnRoom.getType().getTypeName().equals(roomType)) {
+                iterator.remove();
+                continue;
+            }
+            if (returnRoom.getMaxPeople() < maxPeople) {
+                iterator.remove();
+                continue;
+            }
+            if (minPrice != -1 && returnRoom.getType().getPrice() < minPrice) {
+                iterator.remove();
+                continue;
+            }
+            if (maxPrice != -1 && returnRoom.getType().getPrice() > maxPrice) {
+                iterator.remove();
+                continue;
+            }
+        }
+        commonResult.setData(list);
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        return commonResult;
+    }
+
+    @GetMapping(value = "/listAllSpareRoom")
+    public CommonResult<List<ReturnRoomDTO>> listRoom() {
+        CommonResult<List<ReturnRoomDTO>> commonResult = new CommonResult<>();
+        Date earliestDate = new Date(0);
+        Date latestDate = new Date(Long.MAX_VALUE);
+        DateSectionDTO dateSectionDTO = new DateSectionDTO(earliestDate, latestDate);
         List<ReturnRoomDTO> list = roomService.listRooms(dateSectionDTO);
 
         commonResult.setData(list);
@@ -65,12 +103,29 @@ public class RoomController {
         return commonResult;
     }
 
+    @GetMapping(value = "/roomTypes")
+    public CommonResult<String[]> roomTypes() {
+        CommonResult<String[]> commonResult = new CommonResult<>();
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.select("type_name").groupBy("type_name");
+        List<Object> typeNames = typeService.getBaseMapper().selectObjs(queryWrapper);
+        String[] types = new String[typeNames.size()];
+        for (int i = 0; i < typeNames.size(); i++) {
+            types[i] = String.valueOf(typeNames.get(i));
+        }
+        commonResult.setData(types);
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        return commonResult;
+    }
+
+
     @PostMapping("/bookRoom")
     public CommonResult<String> bookRoom(@RequestBody BookDTO bookDTO) {
         CommonResult<String> commonResult = new CommonResult<>();
 
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
-        if(user == null) {
+        if (user == null) {
             commonResult.setData("登录信息过期");
             commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
@@ -79,7 +134,7 @@ public class RoomController {
         Room room = roomService.getById(bookDTO.getRoomId());
         Type type = typeService.getById(room.getType());
         Order order = new Order();
-        BeanUtils.copyProperties(bookDTO,  order);
+        BeanUtils.copyProperties(bookDTO, order);
         order.setUserId(user.getId());
 
         int days = (int) Math.ceil((bookDTO.getLeaveTime().getTime() - bookDTO.getInTime().getTime()) / (60 * 60 * 24 * 1000 * 1.0));

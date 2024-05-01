@@ -5,11 +5,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
-/**
- * @author：rabbiter
- * @date：2022/01/01 15:51
- * Description：
- */
 public class DateSectionDTO {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")

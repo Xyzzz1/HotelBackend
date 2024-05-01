@@ -2,7 +2,6 @@ package com.rabbiter.hotel.controller.user;
 
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
 import com.rabbiter.hotel.domain.User;
@@ -17,11 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
-/**
- * @author：rabbiter
- * @date：2022/01/01 12:08
- * Description：
- */
 @RestController
 @RequestMapping("/user")
 public class UserController {
