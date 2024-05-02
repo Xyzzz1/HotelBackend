@@ -193,4 +193,20 @@ public class UserController {
         return commonResult;
     }
 
+    @GetMapping("/isLoggedIn")
+    public CommonResult<String> isLoggedIn(){
+        CommonResult<String> commonResult = new CommonResult<>();
+        User user = (User) WebUtils.getSession().getAttribute("loginUser");
+        if (null != user) {
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+            commonResult.setData(user.getUserName());
+        } else {
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+            commonResult.setData(null);
+        }
+        return commonResult;
+    }
+
 }

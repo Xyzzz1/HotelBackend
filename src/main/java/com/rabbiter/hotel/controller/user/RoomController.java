@@ -22,11 +22,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * @author：rabbiter
- * @date：2022/01/01 12:57
- * Description：
- */
 @RestController
 @RequestMapping("/user")
 public class RoomController {
@@ -126,11 +121,13 @@ public class RoomController {
 
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
         if (user == null) {
+            System.out.println("登录信息过期");
             commonResult.setData("登录信息过期");
             commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
             return commonResult;
         }
+        System.out.println(user.getUserName());
         Room room = roomService.getById(bookDTO.getRoomId());
         Type type = typeService.getById(room.getType());
         Order order = new Order();
