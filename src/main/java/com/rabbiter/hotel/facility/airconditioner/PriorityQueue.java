@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.facility.airconditioner;
 
-import com.rabbiter.hotel.dto.AirConditionerUserDTO;
+import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class PriorityQueue extends QueueController {
      * 若所有服务队列满，直接返回服务队列，否则你需要按照优先级将AirConditionerUserDTO实例加入服务队列，并从等待队列中移除
      */
     @Override
-    public List<AirConditionerUserDTO> getUser() {
+    public List<AirConditionerStatusDTO> getUser() {
         return null;
     }
 

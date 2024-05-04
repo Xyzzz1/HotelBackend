@@ -19,4 +19,8 @@ public interface ConstantCode {
     public static final Integer NOT_FOUND = 404;
     // 服务器内部错误
     public static final Integer INTERNAL_SERVER_ERROR = 500;
+    //空调服务等待状态
+    public static final Integer WAITING = 502;
+
+
 }

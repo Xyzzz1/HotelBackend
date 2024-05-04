@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.facility.airconditioner;
 
-import com.rabbiter.hotel.dto.AirConditionerUserDTO;
+import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import java.util.List;
 
 /**
@@ -26,7 +26,7 @@ public class PollQueue extends QueueController {
      * 若hours为-1表示没有设定到期时间，除非用户手动关闭，否则会一直在服务队列中，你需要根据slice检查是否到期，若到期需要从服务队列中移除
      */
     @Override
-    public List<AirConditionerUserDTO> getUser() {
+    public List<AirConditionerStatusDTO> getUser() {
         return null;
     }
 

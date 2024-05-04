@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.test.unittest;
 
-import com.rabbiter.hotel.dto.AirConditionerUserDTO;
+import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
 import org.junit.*;
 
@@ -25,9 +25,9 @@ public class QueueDTOTest {
     @Test
     public void test(){
         QueueDTO.setQueueType(1);
-        AirConditionerUserDTO airConditionerUser1=new AirConditionerUserDTO(302,1,2,3);
-        AirConditionerUserDTO airConditionerUser2=new AirConditionerUserDTO(402,4,5,6);
-        AirConditionerUserDTO airConditionerUser3=new AirConditionerUserDTO(502,7,8,9);
+        AirConditionerStatusDTO airConditionerUser1=new AirConditionerStatusDTO(302,true,1,2,3,null);
+        AirConditionerStatusDTO airConditionerUser2=new AirConditionerStatusDTO(402,true,4,5,6,null);
+        AirConditionerStatusDTO airConditionerUser3=new AirConditionerStatusDTO(502,true,7,8,9,null);
 
         QueueDTO.enqueue(airConditionerUser1);
         QueueDTO.enqueue(airConditionerUser2);

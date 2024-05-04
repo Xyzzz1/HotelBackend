@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.facility.airconditioner;
 
-import com.rabbiter.hotel.dto.AirConditionerUserDTO;
+import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import java.util.List;
 
 
@@ -12,6 +12,6 @@ import java.util.List;
 public abstract class QueueController {
     int slice = 1; //时间片，单位为分钟
 
-    public abstract List<AirConditionerUserDTO> getUser();
+    public abstract List<AirConditionerStatusDTO> getUser();
 
 }

@@ -15,32 +15,32 @@ public class QueueDTO {
 
     private static int queueType = SERVICE_QUEUE;
 
-    private static LinkedList<AirConditionerUserDTO> serviceQueue = new LinkedList<>();
-    private static LinkedList<AirConditionerUserDTO> waitQueue = new LinkedList<>();
+    private static LinkedList<AirConditionerStatusDTO> serviceQueue = new LinkedList<>();
+    private static LinkedList<AirConditionerStatusDTO> waitQueue = new LinkedList<>();
 
     public QueueDTO() {
     }
 
-    public static LinkedList<AirConditionerUserDTO> getQueue() {
+    public static LinkedList<AirConditionerStatusDTO> getQueue() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue : waitQueue;
     }
 
     //入队
-    public static void enqueue(AirConditionerUserDTO airConditionerUserDTO) {
+    public static void enqueue(AirConditionerStatusDTO airConditionerStatusDTO) {
         if (queueType == SERVICE_QUEUE) {
-            serviceQueue.add(airConditionerUserDTO);
+            serviceQueue.add(airConditionerStatusDTO);
         } else {
-            waitQueue.add(airConditionerUserDTO);
+            waitQueue.add(airConditionerStatusDTO);
         }
     }
 
     // 出队操作
-    public static AirConditionerUserDTO dequeue() {
+    public static AirConditionerStatusDTO dequeue() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.removeFirst() : waitQueue.removeFirst();
     }
 
     // 获取队首元素（不移除）
-    public static AirConditionerUserDTO peek() {
+    public static AirConditionerStatusDTO peek() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.getFirst() : waitQueue.getFirst();
     }
 

@@ -1,6 +1,7 @@
 package com.rabbiter.hotel.controller.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
 import com.rabbiter.hotel.domain.Order;
@@ -127,12 +128,16 @@ public class RoomController {
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
             return commonResult;
         }
-        System.out.println(user.getUserName());
-        Room room = roomService.getById(bookDTO.getRoomId());
+
+        Room room =roomService.getById(bookDTO.getRoomId());
+        room.setState(1);
+        roomService.updateById(room);
+
         Type type = typeService.getById(room.getType());
         Order order = new Order();
         BeanUtils.copyProperties(bookDTO, order);
         order.setUserId(user.getId());
+
 
         int days = (int) Math.ceil((bookDTO.getLeaveTime().getTime() - bookDTO.getInTime().getTime()) / (60 * 60 * 24 * 1000 * 1.0));
         // System.out.println(days);
