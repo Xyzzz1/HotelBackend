@@ -44,19 +44,9 @@ public class PriorityQueueController extends QueueController {
         int price1 = calculatePrice(a1);
         int price2 = calculatePrice(a2);
         //价格越高优先级越高
-         //return Integer.compare(price2, price1);
+         return Integer.compare(price2, price1);
         // 价格不同时，价格越高优先级越高
-        if (price1 != price2) {
-            return Integer.compare(price2, price1);
-        } else {
-            // 如果价格相同，则比较元素在等待队列中的顺序
-            //return Integer.compare(waitQueue.indexOf(a1), waitQueue.indexOf(a2));
-            // 当价格相同时，比较元素在原队列中的索引
-            int index1 = originalList.indexOf(a1);
-            int index2 = originalList.indexOf(a2);
-            // 返回原始顺序
-            return Integer.compare(index1, index2);
-        }
+
     });
 
     // 根据风速和温度计算每小时的费用，只需要计算每小时的，按照单位时间价格来排优先级
