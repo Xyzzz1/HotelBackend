@@ -10,7 +10,10 @@ import com.rabbiter.hotel.dto.PasswordDTO;
 import com.rabbiter.hotel.dto.RegisterDTO;
 import com.rabbiter.hotel.dto.ReturnUserDTO;
 import com.rabbiter.hotel.service.UserService;
+import com.rabbiter.hotel.sse.SseEmitterServer;
 import com.rabbiter.hotel.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +22,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
+    private final Logger logger = LoggerFactory.getLogger(SseEmitterServer.class);
     @Resource
     private UserService userService;
 
@@ -74,7 +77,7 @@ public class UserController {
             commonResult.setData("账号密码错误，请重试");
         }
 
-        System.out.println(commonResult);
+        logger.info("/login: "+commonResult.toString());
         return commonResult;
     }
 
@@ -105,7 +108,7 @@ public class UserController {
 
         }
 
-        System.out.println(commonResult);
+        logger.info("resetpswd: "+commonResult.toString());
         return commonResult;
     }
 
@@ -121,7 +124,7 @@ public class UserController {
 
 
 
-        System.out.println(commonResult);
+        logger.info("/logout: "+commonResult.toString());
         return commonResult;
     }
 

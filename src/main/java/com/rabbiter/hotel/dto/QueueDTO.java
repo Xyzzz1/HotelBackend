@@ -14,7 +14,7 @@ public class QueueDTO {
     public static final int WAIT_QUEUE = 1;
 
     private static int queueType = SERVICE_QUEUE;
-    private static final int MAX_CAPACITY = 10;  // 假定队列的最大容量，这个最大容量要取决于空调的可用个数
+    private static final int MAX_CAPACITY = 3;  // 假定队列的最大容量，这个最大容量要取决于空调的可用个数
 
 
     private static LinkedList<AirConditionerStatusDTO> serviceQueue = new LinkedList<>();
@@ -25,6 +25,16 @@ public class QueueDTO {
 
     public static LinkedList<AirConditionerStatusDTO> getQueue() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue : waitQueue;
+    }
+
+
+    // 删除特定元素
+    public static void remove(AirConditionerStatusDTO airConditionerStatusDTO){
+        if (queueType == SERVICE_QUEUE) {
+            serviceQueue.remove(airConditionerStatusDTO);
+        } else {
+            waitQueue.remove(airConditionerStatusDTO);
+        }
     }
 
     //入队
@@ -49,6 +59,7 @@ public class QueueDTO {
     public static boolean isEmpty() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.isEmpty() : waitQueue.isEmpty();
     }
+
     public static boolean isFull() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.size() >= MAX_CAPACITY : waitQueue.size() >= MAX_CAPACITY;
     }
@@ -78,4 +89,5 @@ public class QueueDTO {
         waitQueue = new LinkedList<>(); // 确保 waitQueue 不是 null
         setQueueType(SERVICE_QUEUE); // 设置为默认的服务队列
     }
+
 }

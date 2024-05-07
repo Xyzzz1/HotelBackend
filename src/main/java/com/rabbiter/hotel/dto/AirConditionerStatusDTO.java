@@ -14,10 +14,15 @@ import java.util.Date;
 public class AirConditionerStatusDTO {
 
     private int roomID;
+    private int userID;
     private boolean powerOn;
-    private int currentWindSpeed;
     private int targetTemperature; //设定的温度
+    private int windSpeed;
+    private int additionalFee;
     private int targetDuration; //设定的空调使用时长(秒)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private Date requestTime;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
@@ -27,61 +32,104 @@ public class AirConditionerStatusDTO {
 
     }
 
-    public AirConditionerStatusDTO(int roomID, boolean PowerOn,int windSpeed, int temp, int targetDuration, Date powerOnTime) {
+    // 构造方法
+    public AirConditionerStatusDTO(int roomID, int userID, boolean powerOn, int targetTemperature,
+                                   int windSpeed, int additionalFee, int targetDuration,
+                                   Date requestTime, Date powerOnTime) {
         this.roomID = roomID;
-        this.powerOn=PowerOn;
-        this.currentWindSpeed = windSpeed;
-        this.targetTemperature = temp;
+        this.userID = userID;
+        this.powerOn = powerOn;
+        this.targetTemperature = targetTemperature;
+        this.windSpeed = windSpeed;
+        this.additionalFee = additionalFee;
         this.targetDuration = targetDuration;
-        this.powerOnTime=powerOnTime;
+        this.requestTime = requestTime;
+        this.powerOnTime = powerOnTime;
+    }
+    public int getRoomID() {
+        return roomID;
     }
 
     public void setRoomID(int roomID) {
         this.roomID = roomID;
     }
 
-    public int getRoomID() {
-        return this.roomID;
+    public int getUserID() {
+        return userID;
     }
 
-    public void setWindSpeed(int windSpeed) {
-        this.currentWindSpeed = windSpeed;
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public boolean isPowerOn() {
+        return powerOn;
+    }
+
+    public void setPowerOn(boolean powerOn) {
+        this.powerOn = powerOn;
+    }
+
+    public int getTargetTemperature() {
+        return targetTemperature;
+    }
+
+    public void setTargetTemperature(int targetTemperature) {
+        this.targetTemperature = targetTemperature;
     }
 
     public int getWindSpeed() {
-        return this.currentWindSpeed;
+        return windSpeed;
     }
 
-    public void setTemp(int temp) {
-        this.targetTemperature = temp;
+    public void setWindSpeed(int windSpeed) {
+        this.windSpeed = windSpeed;
     }
 
-    public int getTemp() {
-        return this.targetTemperature;
+    public int getAdditionalFee() {
+        return additionalFee;
     }
 
-    public void setSeconds(int hours) {
-        this.targetDuration = hours;
+    public void setAdditionalFee(int additionalFee) {
+        this.additionalFee = additionalFee;
     }
 
-    public int getSeconds() {
-        return this.targetDuration;
+    public int getTargetDuration() {
+        return targetDuration;
     }
 
+    public void setTargetDuration(int targetDuration) {
+        this.targetDuration = targetDuration;
+    }
 
-    public Date getPowerOnTime(){return this.powerOnTime;}
+    public Date getRequestTime() {
+        return requestTime;
+    }
 
-    public void setPowerOnTime(Date date){this.powerOnTime=date;}
+    public void setRequestTime(Date requestTime) {
+        this.requestTime = requestTime;
+    }
+
+    public Date getPowerOnTime() {
+        return powerOnTime;
+    }
+
+    public void setPowerOnTime(Date powerOnTime) {
+        this.powerOnTime = powerOnTime;
+    }
 
 
     @Override
     public String toString() {
-        return "Room{" +
+        return "AirConditionerStatusDTO{" +
                 "roomID=" + roomID +
+                ", userID=" + userID +
                 ", powerOn=" + powerOn +
-                ", currentWindSpeed=" + currentWindSpeed +
                 ", targetTemperature=" + targetTemperature +
+                ", windSpeed=" + windSpeed +
+                ", additionalFee=" + additionalFee +
                 ", targetDuration=" + targetDuration +
+                ", requestTime=" + requestTime +
                 ", powerOnTime=" + powerOnTime +
                 '}';
     }

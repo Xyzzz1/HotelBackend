@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.test.unittest;
 import com.rabbiter.hotel.dto.QueueDTO;
-import com.rabbiter.hotel.dto.AirConditionerUserDTO;
+import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 
 import com.rabbiter.hotel.facility.airconditioner.PriorityQueue;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ public class PriorityQueueTest {
     // 测试计算价格功能
     @Test
     public void testCalculatePrice() {
-        AirConditionerUserDTO user = new AirConditionerUserDTO();
+        AirConditionerStatusDTO user = new AirConditionerStatusDTO();
         user.setWindSpeed(3);
         user.setTemp(28);
         int expectedPrice = 1 + 3 + 3; // 基础价格 + 风速成本 + 温度成本
@@ -44,18 +44,19 @@ public class PriorityQueueTest {
 
     @Test
     public void testPriorityOrder() {
+
         // 初始化等待队列
         QueueDTO.setQueueType(QueueDTO.WAIT_QUEUE);
-        List<AirConditionerUserDTO> waitQueue = QueueDTO.getQueue();
+        List<AirConditionerStatusDTO> waitQueue = QueueDTO.getQueue();
         waitQueue.clear();  // 清除现有队列内容
 
         // 添加测试用户
-        waitQueue.add(new AirConditionerUserDTO(301, 1, 27, 1));  // 价格: 1 + 1 + 2 = 4
-        waitQueue.add(new AirConditionerUserDTO(302, 2, 26, 1));  // 价格: 1 + 2 + 1 = 4
-        waitQueue.add(new AirConditionerUserDTO(303, 1, 25, 1));  // 价格: 1 + 1 + 0 = 2
+        waitQueue.add(new AirConditionerStatusDTO(301, 1, 27, 1));  // 价格: 1 + 1 + 2 = 4
+        waitQueue.add(new AirConditionerStatusDTO(302, 2, 26, 1));  // 价格: 1 + 2 + 1 = 4
+        waitQueue.add(new AirConditionerStatusDTO(303, 1, 25, 1));  // 价格: 1 + 1 + 0 = 2
 
         // 执行getUser，应按价格优先级获取用户
-        List<AirConditionerUserDTO> servicedUsers = controller.getUser();
+        List<AirConditionerStatusDTO> servicedUsers = controller.getUser();
 
         // 检查服务队列是否按正确的顺序
         assertEquals(301, servicedUsers.get(0).getRoomID());  // 最高价格

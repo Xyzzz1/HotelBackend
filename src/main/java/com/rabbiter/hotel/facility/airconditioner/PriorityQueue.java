@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.facility.airconditioner;
 
-import com.rabbiter.hotel.dto.AirConditionerUserDTO;
+import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
 
 import java.util.Comparator;
@@ -27,20 +27,20 @@ import java.util.List;
 public class PriorityQueue extends QueueController {
 
     // 定义优先级队列列表
-    private List<AirConditionerUserDTO> priorityQueue = new LinkedList<>();
+    private List<AirConditionerStatusDTO> priorityQueue = new LinkedList<>();
 
     // 获取当前正在服务的用户列表
-    public List<AirConditionerUserDTO> getUser() {
+    public List<AirConditionerStatusDTO> getUser() {
         // 设置当前队列为服务队列
         QueueDTO.setQueueType(QueueDTO.SERVICE_QUEUE);
-        LinkedList<AirConditionerUserDTO> serviceQueue = QueueDTO.getQueue();
+        LinkedList<AirConditionerStatusDTO> serviceQueue = QueueDTO.getQueue();
 
         // 刷新优先级队列
         refreshPriorityQueue();
 
         // 将用户按照优先级加入服务队列，直到服务队列满或优先级队列为空
         while (!QueueDTO.isFull() && !priorityQueue.isEmpty()) {
-            AirConditionerUserDTO next = extractHighestPriorityUser();
+            AirConditionerStatusDTO next = extractHighestPriorityUser();
             if (next != null) {
                 serviceQueue.add(next);
             }
@@ -56,21 +56,21 @@ public class PriorityQueue extends QueueController {
         priorityQueue.clear();
         // 设置当前队列为等待队列
         QueueDTO.setQueueType(QueueDTO.WAIT_QUEUE);
-        LinkedList<AirConditionerUserDTO> waitQueue = QueueDTO.getQueue();
+        LinkedList<AirConditionerStatusDTO> waitQueue = QueueDTO.getQueue();
         // 将等待队列中的用户加入优先级队列，并根据优先级排序
         priorityQueue.addAll(waitQueue);
         priorityQueue.sort(new PriorityComparator());
     }
 
     // 自定义比较器，用于优先级队列的排序
-    private class PriorityComparator implements Comparator<AirConditionerUserDTO> {
+    private class PriorityComparator implements Comparator<AirConditionerStatusDTO> {
         @Override
-        public int compare(AirConditionerUserDTO a1, AirConditionerUserDTO a2) {
+        public int compare(AirConditionerStatusDTO a1, AirConditionerStatusDTO a2) {
             // 首先比较价格
             int priceComparison = Integer.compare(calculatePrice(a2), calculatePrice(a1));
             // 如果价格相同，按照在等待队列中的顺序排序
             if (priceComparison == 0) {
-                LinkedList<AirConditionerUserDTO> waitQueue = QueueDTO.getQueue();
+                LinkedList<AirConditionerStatusDTO> waitQueue = QueueDTO.getQueue();
                 return Integer.compare(waitQueue.indexOf(a1), waitQueue.indexOf(a2));
             }
             return priceComparison;
@@ -78,7 +78,7 @@ public class PriorityQueue extends QueueController {
     }
 
     // 从优先级队列中提取优先级最高的用户
-    private AirConditionerUserDTO extractHighestPriorityUser() {
+    private AirConditionerStatusDTO extractHighestPriorityUser() {
         if (!priorityQueue.isEmpty()) {
             // 移除并返回优先级最高的用户
             return priorityQueue.remove(0);
@@ -88,10 +88,10 @@ public class PriorityQueue extends QueueController {
     }
 
     // 计算用户使用空调的价格
-    public static int calculatePrice(AirConditionerUserDTO dto) {
+    public static int calculatePrice(AirConditionerStatusDTO dto) {
         int basePrice = 1;// 默认温度成本
         int windSpeedCost = dto.getWindSpeed();// 风速等级确定的费用
-        int temperatureCost = Math.abs(dto.getTemp() - 25);// 温度偏离25°C的费用
+        int temperatureCost = Math.abs(dto.getTargetTemperature() - 25);// 温度偏离25°C的费用
         // 总费用为基础价格加上风速费用和温度费用
         return basePrice + windSpeedCost + temperatureCost;
     }
