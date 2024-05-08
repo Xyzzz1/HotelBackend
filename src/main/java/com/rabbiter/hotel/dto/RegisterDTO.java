@@ -1,9 +1,12 @@
 package com.rabbiter.hotel.dto;
 
 /**
- * @author：rabbiter
- * @date：2022/01/01 12:19
+ * @author：hejiaqi
+ * @date：2024/5/8
  * Description：
+ * 该类的功能为注册，即新用户会先填写注册信息。
+ * 存储 邮箱，用户名，密码，性别和电话
+ * 该类应搭配PasswordDTO进行使用。
  */
 public class RegisterDTO {
 
