@@ -90,4 +90,9 @@ public class QueueDTO {
         setQueueType(SERVICE_QUEUE); // 设置为默认的服务队列
     }
 
+
+    public static int getSize(){
+        return (queueType == SERVICE_QUEUE) ? serviceQueue.size() : waitQueue.size();
+    }
+
 }

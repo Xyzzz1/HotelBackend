@@ -11,10 +11,12 @@ import com.rabbiter.hotel.dto.QueueDTO;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.sse.SseEmitterServer;
 import com.rabbiter.hotel.util.WebUtils;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.json.JSONObject;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -54,10 +56,9 @@ public class AirConditionerController {
     }
 
     @GetMapping(value = "/status")
-    public CommonResult<AirConditionerStatusDTO> status(@RequestParam("roomID") Integer roomID) {
+    public CommonResult<AirConditionerStatusDTO> status(@RequestParam("roomId") Integer roomID) {
         CommonResult<AirConditionerStatusDTO> commonResult = new CommonResult<>();
-        AirConditionerStatusDTO airConditionerStatusDTO = new AirConditionerStatusDTO();
-        airConditionerStatusDTO = findServer(0, roomID);
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
         if (airConditionerStatusDTO == null) {
             airConditionerStatusDTO = findServer(1, roomID);
         } else {
@@ -75,60 +76,118 @@ public class AirConditionerController {
             commonResult.setCode(ConstantCode.WAITING); //在等待队列
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         }
-        logger.info("/status: "+commonResult.toString());
+        logger.info("/status: " + commonResult.toString());
         return commonResult;
     }
 
 
     @PostMapping(value = "/turnOn")
-    public CommonResult<String> turnOn(@RequestBody AirConditionerStatusDTO airConditionerStatusDTO) {
+    public CommonResult<String> turnOn(@RequestBody AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
+        User user = (User) WebUtils.getSession().getAttribute("loginUser");
+        airConditionerStatusDTO.setUserID(user.getId());
         CommonResult<String> commonResult = new CommonResult<>();
         QueueDTO.setQueueType(0);
         if (!QueueDTO.isFull()) {
             QueueDTO.enqueue(airConditionerStatusDTO);
             commonResult.setData("加入服务队列");
-            SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()),"service");
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+
+            //插入记录
+
+
         } else {
             QueueDTO.setQueueType(1);
             QueueDTO.enqueue(airConditionerStatusDTO);
             commonResult.setData("加入等待队列");
-            SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()),"waiting");
+            commonResult.setCode(ConstantCode.WAITING);
         }
-        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+
+        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -1);
+        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
+
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
-        logger.info("/turnOn: "+commonResult.toString());
+        logger.info("/turnOn: " + commonResult.toString());
         return commonResult;
     }
 
-    @PostMapping(value="turnOff")
-    public CommonResult<String> turnOff(@RequestParam("roomID") Integer roomID){
-        CommonResult<String> commonResult=new CommonResult<>();
-        AirConditionerStatusDTO airConditionerStatusDTO=findServer(0,roomID);
+
+    @PostMapping(value = "/adjustTargetTemperature")
+    public CommonResult<String> adjustTargetTemperature(@RequestParam("roomId") Integer roomID, @RequestParam("targetTemperature") Integer temp) {
+        CommonResult<String> commonResult = new CommonResult<>();
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
         if(airConditionerStatusDTO==null){
             airConditionerStatusDTO=findServer(1,roomID);
-            if(airConditionerStatusDTO==null){
+        }
+
+        if(airConditionerStatusDTO==null){
+            commonResult.setData("空调温度调节发生错误！");
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+        }else{
+            airConditionerStatusDTO.setTargetTemperature(temp);
+            commonResult.setData("roomID"+roomID+": 温度修改成功");
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        }
+        return commonResult;
+    }
+
+    @PostMapping(value = "/adjustWindSpeed")
+    public CommonResult<String> adjustWindSpeed(@RequestParam("roomId") Integer roomID, @RequestParam("windSpeed") Integer windSpeed) {
+        CommonResult<String> commonResult = new CommonResult<>();
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
+        if(airConditionerStatusDTO==null){
+            airConditionerStatusDTO=findServer(1,roomID);
+        }
+
+        if(airConditionerStatusDTO==null){
+            commonResult.setData("空调风速调节发生错误！");
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+        }else{
+            airConditionerStatusDTO.setWindSpeed(windSpeed);
+            commonResult.setData("roomID"+roomID+": 风速修改成功");
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        }
+        return commonResult;
+    }
+
+
+
+    @PostMapping(value = "turnOff")
+    public CommonResult<String> turnOff(@RequestParam("roomId") Integer roomID) throws JSONException {
+        CommonResult<String> commonResult = new CommonResult<>();
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
+        if (airConditionerStatusDTO == null) {
+            airConditionerStatusDTO = findServer(1, roomID);
+            if (airConditionerStatusDTO == null) {
                 commonResult.setData("当前空调并未开机。");
                 commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
                 commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
                 return commonResult;
-            }else{
+            } else {
                 commonResult.setData("已从等待队列中移除。");
             }
-        }else{
+        } else {
             commonResult.setData("已从服务队列中移除。");
         }
         QueueDTO.remove(airConditionerStatusDTO);
+
+        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), false, 2);
+        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
+
         commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
-        logger.info("/turnOff: "+commonResult.toString());
+        logger.info("/turnOff: " + commonResult.toString());
         return commonResult;
     }
 
+
     @GetMapping(value = "/subscribe")
-    public SseEmitter subscribe(@RequestParam("roomID") Integer roomID) {
+    public SseEmitter subscribe(@RequestParam("roomId") Integer roomID) {
         return SseEmitterServer.connect(Integer.toString(roomID));
     }
-
 
     public AirConditionerStatusDTO findServer(int type, int roomID) {
         QueueDTO.setQueueType(type);
@@ -140,5 +199,32 @@ public class AirConditionerController {
             }
         }
         return null;
+    }
+
+    private String createSSEMessage(Integer roomID, boolean isTurnOn, Integer reason) throws JSONException {
+        /*
+        reason 枚举类型
+        1 计时器到时自动关闭
+        2 用户主动关闭
+        3 到达指定温度
+        4 被抢占关闭
+        5 意外关闭
+        6 用户改变参数
+        -1 开机
+        */
+        JSONObject innerObj = new JSONObject();
+        QueueDTO.setQueueType(0);
+        innerObj.put("serviceQueueLength", QueueDTO.getSize());
+        QueueDTO.setQueueType(1);
+        innerObj.put("requestQueueSize", QueueDTO.getSize());
+
+        JSONObject obj = new JSONObject();
+        obj.put("source", innerObj);
+        obj.put("timestamp", System.currentTimeMillis());
+        obj.put("roomId", roomID);
+        obj.put("powerOn", isTurnOn);
+        obj.put("reason", reason);
+
+        return obj.toString();
     }
 }
