@@ -4,7 +4,7 @@ package com.rabbiter.hotel.dto;
  * @author：hejiaqi
  * @date：2024/5/8
  * Description：
- * 一个用户注册登陆信息，存储邮箱，密码，电话三个信息。
+ * 用户登陆界面时存储的信息，存储邮箱，密码，电话三个信息。
  * 将用户的账号密码记录，用于登陆界面
  */
 public class LoginDTO {
