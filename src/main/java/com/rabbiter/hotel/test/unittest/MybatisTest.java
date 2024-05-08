@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rabbiter.hotel.HotelManagerApplication;
 import com.rabbiter.hotel.domain.Bill;
 import com.rabbiter.hotel.domain.SpecificBill;
+import com.rabbiter.hotel.dto.DateSectionDTO;
+import com.rabbiter.hotel.dto.ReturnSpecificBillDTO;
 import com.rabbiter.hotel.service.BillService;
 import com.rabbiter.hotel.service.SpecificBillService;
 import org.junit.Test;
@@ -15,6 +17,10 @@ import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Ruiqi Yu
@@ -75,5 +81,31 @@ public class MybatisTest {
     @Test
     public void yourTest() {
 
+    }
+
+    @Test
+    public void testGetSpecificBill() {
+        Integer userId = 123;
+        List<ReturnSpecificBillDTO> specificBills = specificBillService.getSpecificBill(userId);
+        System.out.println(specificBills);
+        assertNotNull(specificBills, "The returned list should not be null");
+    }
+
+    @Test
+    public void testGetDateSectionSpecificBill() {
+        DateSectionDTO dateSectionDTO = new DateSectionDTO();
+
+        // 使用 SimpleDateFormat 来解析字符串形式的日期
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            // 设置起始时间和结束时间
+            dateSectionDTO.setInTime(sdf.parse("2024-05-02 15:30:00"));
+            dateSectionDTO.setLeaveTime(sdf.parse("2024-05-02 19:30:00"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        List<ReturnSpecificBillDTO> dateSpecificBills = specificBillService.getDateSectionSpecificBill(dateSectionDTO);
+        System.out.println(dateSpecificBills);
     }
 }

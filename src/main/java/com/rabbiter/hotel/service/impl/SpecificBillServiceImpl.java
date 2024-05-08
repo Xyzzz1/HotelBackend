@@ -1,19 +1,30 @@
 package com.rabbiter.hotel.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rabbiter.hotel.domain.Order;
 import com.rabbiter.hotel.domain.SpecificBill;
 import com.rabbiter.hotel.dto.DateSectionDTO;
 import com.rabbiter.hotel.dto.ReturnSpecificBillDTO;
+import com.rabbiter.hotel.mapper.OrderMapper;
 import com.rabbiter.hotel.mapper.SpecificBillMapper;
 import com.rabbiter.hotel.service.SpecificBillService;
+import org.apache.ibatis.annotations.Select;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @author 你的名字
- * @date: 日期
+ * @author 谭磊
+ * @date: 2024。5.6
  * Description:
  */
 
@@ -25,6 +36,11 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class SpecificBillServiceImpl extends ServiceImpl<SpecificBillMapper, SpecificBill> implements SpecificBillService {
 
+    @Resource
+    private SpecificBillMapper specificBillMapper;
+
+    @Resource
+    private OrderMapper orderMapper;
     /**
      创建表的sql语句如下：
      bill：
@@ -63,7 +79,32 @@ public class SpecificBillServiceImpl extends ServiceImpl<SpecificBillMapper, Spe
      */
     @Override
     public List<ReturnSpecificBillDTO> getSpecificBill(Integer userID){
-        return null;
+        QueryWrapper<SpecificBill> specificBillQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<Order> orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.eq("user_id",userID)
+                .orderByDesc("in_time");
+        List<Order> orders = orderMapper.selectList(orderQueryWrapper);
+        // 检查订单列表是否为空
+        if (orders.isEmpty()) {
+            // 如果没有订单，返回一个空的SpecificBill列表
+            return new ArrayList<>();
+        }
+
+        Date inTime = orders.get(0).getInTime();//最近一次的入住时间
+
+        specificBillQueryWrapper.eq("user_id", userID)
+                .ge("start_time",inTime);
+        List<SpecificBill> specificBills = specificBillMapper.selectList(specificBillQueryWrapper);
+
+        List<ReturnSpecificBillDTO> userSpecificBills = specificBills.stream()
+                .map(specificBill -> {
+                    ReturnSpecificBillDTO dto = new ReturnSpecificBillDTO();
+                    BeanUtils.copyProperties(specificBill, dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return userSpecificBills;
     }
 
     /**
@@ -75,6 +116,25 @@ public class SpecificBillServiceImpl extends ServiceImpl<SpecificBillMapper, Spe
      */
     @Override
     public List<ReturnSpecificBillDTO> getDateSectionSpecificBill(DateSectionDTO dateSectionDTO){
-        return null;
+
+        QueryWrapper<SpecificBill> specificBillQueryWrapper = new QueryWrapper<>();
+
+        List<SpecificBill> specificBills = specificBillMapper.selectList(specificBillQueryWrapper
+                .ge("start_time", dateSectionDTO.getInTime())
+                .le("end_time", dateSectionDTO.getLeaveTime())
+        );
+
+
+        List<ReturnSpecificBillDTO> dateSectionSpecificBill = specificBills.stream()
+                .map(specificBill -> {
+                    ReturnSpecificBillDTO dto = new ReturnSpecificBillDTO();
+                    // 所有属性名和类型都相同，可以使用BeanUtils来复制属性
+                    BeanUtils.copyProperties(specificBill, dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return dateSectionSpecificBill;
     }
 }
+
