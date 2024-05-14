@@ -5,6 +5,7 @@ import com.rabbiter.hotel.dto.QueueDTO;
 import com.rabbiter.hotel.facility.airconditioner.PollQueue;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,9 +22,9 @@ public class PollQueueTest {
     public void test(){
         QueueDTO dt=new QueueDTO();
         dt.setQueueType(1);
-        AirConditionerStatusDTO airConditionerUser1=new AirConditionerStatusDTO(302,1,2,3);
-        AirConditionerStatusDTO airConditionerUser2=new AirConditionerStatusDTO(402,4,5,2);
-        AirConditionerStatusDTO airConditionerUser3=new AirConditionerStatusDTO(502,7,8,1);
+        AirConditionerStatusDTO airConditionerUser1=new AirConditionerStatusDTO(1, 1, true, 21, 3, 0, 60, new Date(), 1);
+        AirConditionerStatusDTO airConditionerUser2= new AirConditionerStatusDTO(2, 2, true, 23, 2, 0, 360, new Date(), 1);
+        AirConditionerStatusDTO airConditionerUser3=new AirConditionerStatusDTO(3, 3, true, 24, 1, 0, 1800, new Date(), 1);
 
         dt.enqueue(airConditionerUser1);
         dt.enqueue(airConditionerUser2);

@@ -14,7 +14,7 @@ public class QueueDTO {
     public static final int WAIT_QUEUE = 1;
 
     private static int queueType = SERVICE_QUEUE;
-    private static final int MAX_CAPACITY = 3;  // 假定队列的最大容量，这个最大容量要取决于空调的可用个数
+    private static final int MAX_CAPACITY = 2;  // 假定队列的最大容量，这个最大容量要取决于空调的可用个数
 
 
     private static LinkedList<AirConditionerStatusDTO> serviceQueue = new LinkedList<>();

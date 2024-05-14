@@ -24,9 +24,8 @@ public class AirConditionerStatusDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private Date requestTime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private Date powerOnTime;
+    private int mode;//0制热，1制冷Ï
+
 
     public AirConditionerStatusDTO() {
 
@@ -35,7 +34,7 @@ public class AirConditionerStatusDTO {
     // 构造方法
     public AirConditionerStatusDTO(int roomID, int userID, boolean powerOn, int targetTemperature,
                                    int windSpeed, int additionalFee, int targetDuration,
-                                   Date requestTime, Date powerOnTime) {
+                                   Date requestTime, int mode) {
         this.roomID = roomID;
         this.userID = userID;
         this.powerOn = powerOn;
@@ -44,7 +43,7 @@ public class AirConditionerStatusDTO {
         this.additionalFee = additionalFee;
         this.targetDuration = targetDuration;
         this.requestTime = requestTime;
-        this.powerOnTime = powerOnTime;
+        this.mode = mode;
     }
     public int getRoomID() {
         return roomID;
@@ -110,12 +109,12 @@ public class AirConditionerStatusDTO {
         this.requestTime = requestTime;
     }
 
-    public Date getPowerOnTime() {
-        return powerOnTime;
+    public int getPowerOnTime() {
+        return mode;
     }
 
-    public void setPowerOnTime(Date powerOnTime) {
-        this.powerOnTime = powerOnTime;
+    public void setMode(int mode) {
+        this.mode = mode;
     }
 
 
@@ -130,7 +129,7 @@ public class AirConditionerStatusDTO {
                 ", additionalFee=" + additionalFee +
                 ", targetDuration=" + targetDuration +
                 ", requestTime=" + requestTime +
-                ", powerOnTime=" + powerOnTime +
+                ", mode=" + mode +
                 '}';
     }
 }

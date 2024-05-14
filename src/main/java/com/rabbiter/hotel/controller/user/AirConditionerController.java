@@ -8,6 +8,7 @@ import com.rabbiter.hotel.domain.Order;
 import com.rabbiter.hotel.domain.User;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
+import com.rabbiter.hotel.facility.airconditioner.QueueController;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.sse.SseEmitterServer;
 import com.rabbiter.hotel.util.WebUtils;
@@ -58,9 +59,9 @@ public class AirConditionerController {
     @GetMapping(value = "/status")
     public CommonResult<AirConditionerStatusDTO> status(@RequestParam("roomId") Integer roomID) {
         CommonResult<AirConditionerStatusDTO> commonResult = new CommonResult<>();
-        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(QueueDTO.SERVICE_QUEUE, roomID);
         if (airConditionerStatusDTO == null) {
-            airConditionerStatusDTO = findServer(1, roomID);
+            airConditionerStatusDTO = findServer(QueueDTO.WAIT_QUEUE, roomID);
         } else {
             commonResult.setData(airConditionerStatusDTO);
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
@@ -86,7 +87,7 @@ public class AirConditionerController {
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
         airConditionerStatusDTO.setUserID(user.getId());
         CommonResult<String> commonResult = new CommonResult<>();
-        QueueDTO.setQueueType(0);
+        QueueDTO.setQueueType(QueueDTO.SERVICE_QUEUE);
         if (!QueueDTO.isFull()) {
             QueueDTO.enqueue(airConditionerStatusDTO);
             commonResult.setData("加入服务队列");
@@ -96,7 +97,7 @@ public class AirConditionerController {
 
 
         } else {
-            QueueDTO.setQueueType(1);
+            QueueDTO.setQueueType(QueueDTO.WAIT_QUEUE);
             QueueDTO.enqueue(airConditionerStatusDTO);
             commonResult.setData("加入等待队列");
             commonResult.setCode(ConstantCode.WAITING);
@@ -114,9 +115,9 @@ public class AirConditionerController {
     @PostMapping(value = "/adjustTargetTemperature")
     public CommonResult<String> adjustTargetTemperature(@RequestParam("roomId") Integer roomID, @RequestParam("targetTemperature") Integer temp) {
         CommonResult<String> commonResult = new CommonResult<>();
-        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(QueueDTO.SERVICE_QUEUE, roomID);
         if(airConditionerStatusDTO==null){
-            airConditionerStatusDTO=findServer(1,roomID);
+            airConditionerStatusDTO=findServer(QueueDTO.WAIT_QUEUE,roomID);
         }
 
         if(airConditionerStatusDTO==null){
@@ -135,9 +136,9 @@ public class AirConditionerController {
     @PostMapping(value = "/adjustWindSpeed")
     public CommonResult<String> adjustWindSpeed(@RequestParam("roomId") Integer roomID, @RequestParam("windSpeed") Integer windSpeed) {
         CommonResult<String> commonResult = new CommonResult<>();
-        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(QueueDTO.SERVICE_QUEUE, roomID);
         if(airConditionerStatusDTO==null){
-            airConditionerStatusDTO=findServer(1,roomID);
+            airConditionerStatusDTO=findServer(QueueDTO.WAIT_QUEUE,roomID);
         }
 
         if(airConditionerStatusDTO==null){
@@ -158,9 +159,9 @@ public class AirConditionerController {
     @PostMapping(value = "turnOff")
     public CommonResult<String> turnOff(@RequestParam("roomId") Integer roomID) throws JSONException {
         CommonResult<String> commonResult = new CommonResult<>();
-        AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
+        AirConditionerStatusDTO airConditionerStatusDTO = findServer(QueueDTO.SERVICE_QUEUE, roomID);
         if (airConditionerStatusDTO == null) {
-            airConditionerStatusDTO = findServer(1, roomID);
+            airConditionerStatusDTO = findServer(QueueDTO.WAIT_QUEUE, roomID);
             if (airConditionerStatusDTO == null) {
                 commonResult.setData("当前空调并未开机。");
                 commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
