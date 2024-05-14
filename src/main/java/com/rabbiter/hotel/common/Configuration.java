@@ -28,7 +28,7 @@ public class Configuration {
     public static void loadProperties(){
         Properties properties = new Properties();
         String filePath = Paths.get("").toAbsolutePath().toString()+"/.idea/config/config.properties";
-        System.out.println(filePath);
+        //System.out.println(filePath);
         try (InputStream input = new BufferedInputStream(new FileInputStream(filePath))) {
             if (input == null) {
                 System.out.println("Sorry, unable to find config.properties");

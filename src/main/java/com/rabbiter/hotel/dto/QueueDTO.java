@@ -32,6 +32,15 @@ public class QueueDTO {
     public QueueDTO() {
     }
 
+    public static LinkedList<AirConditionerStatusDTO> getServiceQueueQueue() {
+        return serviceQueue;
+    }
+
+    public static LinkedList<AirConditionerStatusDTO> getWaitQueueQueue() {
+        return waitQueue;
+    }
+
+
     public static LinkedList<AirConditionerStatusDTO> getQueue() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue : waitQueue;
     }
