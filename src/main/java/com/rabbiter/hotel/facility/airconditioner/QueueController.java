@@ -12,6 +12,6 @@ import java.util.List;
 public abstract class QueueController {
     int slice = 1; //时间片，单位为分钟
 
-    public abstract List<AirConditionerStatusDTO> getUser();
+    public abstract List<AirConditionerUserDTO> getUser(QueueDTO qdt);
 
 }
