@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author Ruiqi Yu
@@ -131,5 +132,30 @@ public class AirConditionerStatusDTO {
                 ", requestTime=" + requestTime +
                 ", mode=" + mode +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        AirConditionerStatusDTO other = (AirConditionerStatusDTO) obj;
+        return roomID == other.roomID &&
+                userID == other.userID &&
+                powerOn == other.powerOn &&
+                targetTemperature == other.targetTemperature &&
+                windSpeed == other.windSpeed &&
+                additionalFee == other.additionalFee &&
+                targetDuration == other.targetDuration &&
+                mode == other.mode &&
+                Objects.equals(requestTime, other.requestTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(roomID, userID, powerOn, targetTemperature, windSpeed, additionalFee, targetDuration, requestTime, mode);
     }
 }
