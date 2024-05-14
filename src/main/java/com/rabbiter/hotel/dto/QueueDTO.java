@@ -10,58 +10,64 @@ import java.util.LinkedList;
  */
 public class QueueDTO {
 
-    public static final int SERVICE_QUEUE = 0;
-    public static final int WAIT_QUEUE = 1;
+    private static final int SERVICE_QUEUE = 0;
+    private static final int WAIT_QUEUE = 1;
 
     private static int queueType = SERVICE_QUEUE;
-    private static final int MAX_CAPACITY = 3;  // 假定队列的最大容量，这个最大容量要取决于空调的可用个数
+
+    private static LinkedList<AirConditionerUserDTO> serviceQueue = new LinkedList<>();
+    private static LinkedList<AirConditionerUserDTO> waitQueue = new LinkedList<>();
 
 
-    private static LinkedList<AirConditionerStatusDTO> serviceQueue = new LinkedList<>();
-    private static LinkedList<AirConditionerStatusDTO> waitQueue = new LinkedList<>();
+    public static int getQueueType() {
+        return queueType;
+    }
+
+    public static LinkedList<AirConditionerUserDTO> getServiceQueue() {
+        return serviceQueue;
+    }
+
+    public static void setServiceQueue(LinkedList<AirConditionerUserDTO> serviceQueue) {
+        QueueDTO.serviceQueue = serviceQueue;
+    }
+
+    public static LinkedList<AirConditionerUserDTO> getWaitQueue() {
+        return waitQueue;
+    }
+
+    public static void setWaitQueue(LinkedList<AirConditionerUserDTO> waitQueue) {
+        QueueDTO.waitQueue = waitQueue;
+    }
 
     public QueueDTO() {
     }
 
-    public static LinkedList<AirConditionerStatusDTO> getQueue() {
+    //返回当前队列类型（服务队列或等待队列）的队列实例。
+    public static LinkedList<AirConditionerUserDTO> getQueue() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue : waitQueue;
     }
 
-
-    // 删除特定元素
-    public static void remove(AirConditionerStatusDTO airConditionerStatusDTO){
-        if (queueType == SERVICE_QUEUE) {
-            serviceQueue.remove(airConditionerStatusDTO);
-        } else {
-            waitQueue.remove(airConditionerStatusDTO);
-        }
-    }
-
     //入队
-    public static void enqueue(AirConditionerStatusDTO airConditionerStatusDTO) {
+    public static void enqueue(AirConditionerUserDTO airConditionerUserDTO) {
         if (queueType == SERVICE_QUEUE) {
-            serviceQueue.add(airConditionerStatusDTO);
+            serviceQueue.add(airConditionerUserDTO);
         } else {
-            waitQueue.add(airConditionerStatusDTO);
+            waitQueue.add(airConditionerUserDTO);
         }
     }
 
     // 出队操作
-    public static AirConditionerStatusDTO dequeue() {
+    public static AirConditionerUserDTO dequeue() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.removeFirst() : waitQueue.removeFirst();
     }
 
     // 获取队首元素（不移除）
-    public static AirConditionerStatusDTO peek() {
+    public static AirConditionerUserDTO peek() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.getFirst() : waitQueue.getFirst();
     }
 
     public static boolean isEmpty() {
         return (queueType == SERVICE_QUEUE) ? serviceQueue.isEmpty() : waitQueue.isEmpty();
-    }
-
-    public static boolean isFull() {
-        return (queueType == SERVICE_QUEUE) ? serviceQueue.size() >= MAX_CAPACITY : waitQueue.size() >= MAX_CAPACITY;
     }
 
     public static int size() {
@@ -76,23 +82,4 @@ public class QueueDTO {
             throw new IllegalArgumentException("Invalid queue type");
         }
     }
-
-    // 清空所有队列
-    public static void clearQueue() {
-        serviceQueue.clear();
-        waitQueue.clear();
-    }
-
-    // 初始化队列
-    public static void initQueue() {
-        serviceQueue = new LinkedList<>(); // 确保 serviceQueue 不是 null
-        waitQueue = new LinkedList<>(); // 确保 waitQueue 不是 null
-        setQueueType(SERVICE_QUEUE); // 设置为默认的服务队列
-    }
-
-
-    public static int getSize(){
-        return (queueType == SERVICE_QUEUE) ? serviceQueue.size() : waitQueue.size();
-    }
-
 }
