@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @author hejiaqi
- * @date: 2024/5/5
+ * @date: 2024/5/14
 
  */
 
@@ -80,6 +80,19 @@ public class PollQueueTest {
         System.out.println("############################################");
         user1 = pollQueue.getUser(dt);
         System.out.println("四次时间片后的结果");
+        System.out.println(user1.toString());
+        System.out.println("DTO中的队列结果");
+        System.out.println("服务队列");
+        dt.setQueueType(0);
+        System.out.println(dt.getQueue());
+        System.out.println("等待队列");
+        dt.setQueueType(1);
+        System.out.println(dt.getQueue());
+
+
+        System.out.println("############################################");
+        user1 = pollQueue.getUser(dt);
+        System.out.println("五次时间片后的结果");
         System.out.println(user1.toString());
         System.out.println("DTO中的队列结果");
         System.out.println("服务队列");
