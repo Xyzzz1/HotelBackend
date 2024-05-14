@@ -14,14 +14,14 @@ public class QueueDTO {
     public static final int SERVICE_QUEUE = 0;
     public static final int WAIT_QUEUE = 1;
 
-    private static int queueType;
+    private static int queueType=SERVICE_QUEUE;
     private static final int MAX_CAPACITY = 2;  // 假定队列的最大容量，这个最大容量要取决于空调的可用个数
 
     public static final int SLICE = 20; //时间片，单位为s
     public static final int PRIORITY = 2;
     public static final int POLL = 3;
 
-    public static int MODE;
+    public static int MODE=PRIORITY;
 
     public static List<AirConditionerStatusDTO> lastServiceQueue;
 
@@ -30,8 +30,6 @@ public class QueueDTO {
     private static LinkedList<AirConditionerStatusDTO> waitQueue = new LinkedList<>();
 
     public QueueDTO() {
-        queueType= SERVICE_QUEUE;
-        MODE=PRIORITY; //默认为优先级调度
     }
 
     public static LinkedList<AirConditionerStatusDTO> getQueue() {

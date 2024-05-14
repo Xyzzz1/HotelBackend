@@ -38,6 +38,8 @@ public class QueueDTOTest {
         System.out.println(QueueDTO.dequeue().toString());
         System.out.println(QueueDTO.dequeue().toString());
         System.out.println(QueueDTO.dequeue().toString());
+
+        System.out.println(QueueDTO.MODE);
     }
 
 }
