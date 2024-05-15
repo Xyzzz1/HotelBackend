@@ -14,6 +14,6 @@ import java.util.List;
 public abstract class QueueController {
 
 
-    public abstract List<AirConditionerUserDTO> getUser(QueueDTO qdt);
+    public abstract List<AirConditionerStatusDTO> getUser();
 
 }

@@ -36,13 +36,12 @@ public class PollQueue extends QueueController {
      * 每次调用该方法都从每个队列中取下一个元素加入列表，仅供参考
      * 若hours为-1表示没有设定到期时间，除非用户手动关闭，否则会一直在服务队列中，你需要根据slice检查是否到期，若到期需要从服务队列中移除
      */
-
-    static  int resource_num=2;//设置资源为10个，即有10个空调数
+    
     @Override
-    public  List<AirConditionerStatusDTO> getUser(QueueDTO qdt) {
+    public  List<AirConditionerStatusDTO> getUser() {
         //当前的服务队列和等待队列，0服务
-            ArrayList<AirConditionerStatusDTO> prewait=new ArrayList<>(qdt.getWaitQueue());
-            ArrayList<AirConditionerStatusDTO> preservice=new ArrayList<>(qdt.getServiceQueue());
+            ArrayList<AirConditionerStatusDTO> prewait=new ArrayList<>(QueueDTO.getWaitQueue());
+            ArrayList<AirConditionerStatusDTO> preservice=new ArrayList<>(QueueDTO.getServiceQueue());
 
 
 
@@ -55,66 +54,66 @@ public class PollQueue extends QueueController {
             if(wait_size!=0)
             {
                 //服务队列出列,放等待
-                qdt.setQueueType(0);
+                QueueDTO.setQueueType(0);
                 int flag=0;//记录出服务个数
                 for (int i = 0; i < service_size&&i<wait_size; i++) {
-                    qdt.setQueueType(0);
-                    AirConditionerStatusDTO user=qdt.dequeue();
+                    QueueDTO.setQueueType(0);
+                    AirConditionerStatusDTO user=QueueDTO.dequeue();
                     flag++;
 
-                    qdt.setQueueType(1);
-                    int time=user. getTargetDuration()-qdt.SLICE;
+                    QueueDTO.setQueueType(1);
+                    int time=user. getTargetDuration()-QueueDTO.SLICE;
                     user.setTargetDuration(time);
                     if(time>0)
                     {
-                        qdt.enqueue(user);
+                        QueueDTO.enqueue(user);
                     }
                     else servered.add(user);
                 }
                 //原服务队列减时间片
-                qdt.setQueueType(0);
+                QueueDTO.setQueueType(0);
                 for (int i = 0; i < service_size-flag; i++) {
-                    AirConditionerStatusDTO user=qdt.dequeue();
-                    int time=user.getTargetDuration()-qdt.SLICE;
+                    AirConditionerStatusDTO user=QueueDTO.dequeue();
+                    int time=user.getTargetDuration()-QueueDTO.SLICE;
                     user.setTargetDuration(time);
                     if(time>0)
                     {
-                        qdt.enqueue(user);
+                        QueueDTO.enqueue(user);
                     }
                     else servered.add(user);
                 }
                 //得到新的服务队列size
-                service_size=qdt.size();
-                qdt.setQueueType(1);
-                wait_size=qdt.size();
-                int remain=resource_num-service_size;
+                service_size=QueueDTO.size();
+                QueueDTO.setQueueType(1);
+                wait_size=QueueDTO.size();
+                int remain=QueueDTO.MAX_CAPACITY-service_size;
                 //放新的服务对象和改变等待队列
                 for (int i = 0; i < remain&&i<wait_size; i++) {
-                    qdt.setQueueType(1);
-                    AirConditionerStatusDTO user=qdt.dequeue();
-                    qdt.setQueueType(0);
-                    qdt.enqueue(user);
+                    QueueDTO.setQueueType(1);
+                    AirConditionerStatusDTO user=QueueDTO.dequeue();
+                    QueueDTO.setQueueType(0);
+                    QueueDTO.enqueue(user);
                 }
 
             }
             else {
                 //原服务队列减时间片
-                qdt.setQueueType(0);
-                for (int i = 0; i < resource_num && i<service_size; i++) {
-                    AirConditionerStatusDTO user=qdt.dequeue();
-                    int time=user.getTargetDuration()-qdt.SLICE;
+                QueueDTO.setQueueType(0);
+                for (int i = 0; i < QueueDTO.MAX_CAPACITY && i<service_size; i++) {
+                    AirConditionerStatusDTO user=QueueDTO.dequeue();
+                    int time=user.getTargetDuration()-QueueDTO.SLICE;
                     user.setTargetDuration(time);
                     if(time>0)
                     {
-                        qdt.enqueue(user);
+                        QueueDTO.enqueue(user);
                     }
                     else servered.add(user);
                 }
             }
 
 
-            qdt.setQueueType(0);
-            result=new ArrayList<>(qdt.getServiceQueue());
+            QueueDTO.setQueueType(0);
+            result=new ArrayList<>(QueueDTO.getServiceQueue());
 
             return result;
 
