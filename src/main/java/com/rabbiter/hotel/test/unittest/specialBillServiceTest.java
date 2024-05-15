@@ -22,27 +22,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Ruiqi Yu
- * @date: 2024/5/2
- * Description: 你可以在这里新建测试，给出测试用例，对每一个方法均进行测试.
- * 若环境搭建成功，会看到以下输出：
- * Bill{id=1, user_id=123, user_name='test_user', fee=60, create_time=Thu May 02 15:30:00 CST 2024}
- * SpecificBill{id=1, userId=123, startTime=Thu May 02 15:30:00 CST 2024, roomId=111, endTime=Thu May 02 19:30:00 CST 2024, windSpeed=2, temperature=25, shutdownTime=Thu May 02 19:30:00 CST 2024, reason=1, extraFee=50}
- * 此时数据库中也有相应的记录
- *
- * 注意使用debug模式运行，点击Console会有打印信息，否则输出比较混乱
- */
-
 @SpringBootTest(classes = HotelManagerApplication.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class MybatisTest {
+public class specialBillServiceTest {
     @Resource
     private BillService billService;
 
     @Resource
     private SpecificBillService specificBillService;
-
 
     @Test
     public void test() throws ParseException {
@@ -79,8 +66,28 @@ public class MybatisTest {
     }
 
     @Test
-    public void yourTest() {
-
+    public void testGetSpecificBill() {
+        Integer userId = 123;
+        List<ReturnSpecificBillDTO> specificBills = specificBillService.getSpecificBill(userId);
+        System.out.println(specificBills);
+        assertNotNull(specificBills, "The returned list should not be null");
     }
 
+    @Test
+    public void testGetDateSectionSpecificBill() {
+        DateSectionDTO dateSectionDTO = new DateSectionDTO();
+
+        // 使用 SimpleDateFormat 来解析字符串形式的日期
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            // 设置起始时间和结束时间
+            dateSectionDTO.setInTime(sdf.parse("2024-05-02 15:30:00"));
+            dateSectionDTO.setLeaveTime(sdf.parse("2024-05-02 19:30:00"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        List<ReturnSpecificBillDTO> dateSpecificBills = specificBillService.getDateSectionSpecificBill(dateSectionDTO);
+        System.out.println(dateSpecificBills);
+    }
 }

@@ -5,11 +5,12 @@ import com.rabbiter.hotel.dto.QueueDTO;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * @author hejiaqi
- * @date: 2024/5/5
+ * @date: 2024/5/14
  * Description:
  * 每调用一次该方法，就是一个时间片结束，对应资源服务应该的对象。
  * 注意：
@@ -38,62 +39,86 @@ public class PollQueue extends QueueController {
 
     static  int resource_num=2;//设置资源为10个，即有10个空调数
     @Override
-    public List<AirConditionerStatusDTO> getUser() {
-        return null;
-    }
-    public static List<AirConditionerStatusDTO> getUser1(QueueDTO qdt) {
-        ArrayList<AirConditionerStatusDTO> result=new ArrayList<>();
-        AirConditionerStatusDTO[] arr=new AirConditionerStatusDTO[resource_num];//创建服务数组，使得每个资源服务的有对应的人
-        //将服务队列的转换为数组arr
-        ArrayList<AirConditionerStatusDTO> servered=new ArrayList<>();//已完成服务的队列（感觉应该放入QueueDTO）
-        qdt.setQueueType(0);
-        int qdt_size=qdt.size();
-        for (int i = 0; i<resource_num&&i < qdt_size; i++) {
-            arr[i]=qdt.dequeue();
-        }
+    public  List<AirConditionerStatusDTO> getUser(QueueDTO qdt) {
+        //当前的服务队列和等待队列，0服务
+            ArrayList<AirConditionerStatusDTO> prewait=new ArrayList<>(qdt.getWaitQueue());
+            ArrayList<AirConditionerStatusDTO> preservice=new ArrayList<>(qdt.getServiceQueue());
 
-        //一次轮询服务结束
-        qdt.setQueueType(1);//切换为等待队列模式
-        for (int i = 0; i<resource_num; i++) {
-            //设置新的时间
-            if(arr[i]!=null)
+
+
+            ArrayList<AirConditionerStatusDTO> result;//当前在服务队列里的
+            ArrayList<AirConditionerStatusDTO> servered=new ArrayList<>();//已完成服务的队列（感觉应该放入QueueDTO）
+
+            int wait_size=prewait.size();
+            int service_size=preservice.size();
+            //出列一定数量的对象，放入等待队列，再取
+            if(wait_size!=0)
             {
-                if(arr[i].getTargetDuration()>=1)
-                    arr[i].setTargetDuration(arr[i].getTargetDuration()-1);
-                else
-                    arr[i].setTargetDuration(0);
+                //服务队列出列,放等待
+                qdt.setQueueType(0);
+                int flag=0;//记录出服务个数
+                for (int i = 0; i < service_size&&i<wait_size; i++) {
+                    qdt.setQueueType(0);
+                    AirConditionerStatusDTO user=qdt.dequeue();
+                    flag++;
+
+                    qdt.setQueueType(1);
+                    int time=user. getTargetDuration()-qdt.SLICE;
+                    user.setTargetDuration(time);
+                    if(time>0)
+                    {
+                        qdt.enqueue(user);
+                    }
+                    else servered.add(user);
+                }
+                //原服务队列减时间片
+                qdt.setQueueType(0);
+                for (int i = 0; i < service_size-flag; i++) {
+                    AirConditionerStatusDTO user=qdt.dequeue();
+                    int time=user.getTargetDuration()-qdt.SLICE;
+                    user.setTargetDuration(time);
+                    if(time>0)
+                    {
+                        qdt.enqueue(user);
+                    }
+                    else servered.add(user);
+                }
+                //得到新的服务队列size
+                service_size=qdt.size();
+                qdt.setQueueType(1);
+                wait_size=qdt.size();
+                int remain=resource_num-service_size;
+                //放新的服务对象和改变等待队列
+                for (int i = 0; i < remain&&i<wait_size; i++) {
+                    qdt.setQueueType(1);
+                    AirConditionerStatusDTO user=qdt.dequeue();
+                    qdt.setQueueType(0);
+                    qdt.enqueue(user);
+                }
+
+            }
+            else {
+                //原服务队列减时间片
+                qdt.setQueueType(0);
+                for (int i = 0; i < resource_num && i<service_size; i++) {
+                    AirConditionerStatusDTO user=qdt.dequeue();
+                    int time=user.getTargetDuration()-qdt.SLICE;
+                    user.setTargetDuration(time);
+                    if(time>0)
+                    {
+                        qdt.enqueue(user);
+                    }
+                    else servered.add(user);
+                }
             }
 
 
-            //当前的进入等待队列或者已结束服务列表
-            if(arr[i]!=null)
-            {
-                if(arr[i].getTargetDuration()==0)
-                    servered.add(arr[i]);
-                else
-                    qdt.enqueue(arr[i]);
-            }
+            qdt.setQueueType(0);
+            result=new ArrayList<>(qdt.getServiceQueue());
+
+            return result;
 
 
-            //取新的进行服务,同时删除队列内的
-            arr[i]=null;
-            if(!qdt.isEmpty())//等待队列不为空
-            {
-                arr[i]=qdt.dequeue();
-            }
-
-        }
-
-        qdt.setQueueType(0);
-        //将数组转换为List
-        for (int i = 0;i<resource_num&&arr[i]!=null; i++) {
-            result.add(arr[i]);
-            qdt.enqueue(arr[i]);
-        }
-        //修改DTO服务队列
-
-
-        return result;
     }
 
 
