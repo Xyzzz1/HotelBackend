@@ -18,6 +18,7 @@ public class Configuration {
     public static int timeSlice;
     public static double temperatureChangeRate;
     public static int timeChangeRate;
+    public static int queueCapacity;
 
 
     static {
@@ -43,6 +44,7 @@ public class Configuration {
             timeSlice = Integer.parseInt(properties.getProperty("time.slice"));
             temperatureChangeRate = Double.parseDouble(properties.getProperty("temperature.change.rate"));
             timeChangeRate = Integer.parseInt(properties.getProperty("time.change.rate"));
+            queueCapacity=Integer.parseInt(properties.getProperty("queue.capacity"));
 
         } catch (IOException ex) {
             ex.printStackTrace();
