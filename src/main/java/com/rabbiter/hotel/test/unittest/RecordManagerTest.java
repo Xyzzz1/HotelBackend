@@ -63,7 +63,13 @@ public class RecordManagerTest {
         user1.setRequestTime(currentTime);
         rm.powerOn(user1);
 
+        //调整温度
+        user1.setTargetTemperature(16);
+        rm.temperAdjust(user1);
 
+        //调整duration
+        user1.setTargetDuration(233333333);
+        rm.DurationAdjust(user1);
 
     }
 
