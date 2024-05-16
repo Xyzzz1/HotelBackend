@@ -1,9 +1,11 @@
 package com.rabbiter.hotel.dto;
 
 /**
- * @author：rabbiter
- * @date：2022/01/01 12:17
+ * @author：hejiaqi
+ * @date：2024/5/8
  * Description：
+ * 用户登陆界面时存储的信息，存储邮箱，密码，电话三个信息。
+ * 将用户的账号密码记录，用于登陆界面
  */
 public class LoginDTO {
 
