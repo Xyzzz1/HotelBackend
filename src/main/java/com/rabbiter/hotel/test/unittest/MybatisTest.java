@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Description: 你可以在这里新建测试，给出测试用例，对每一个方法均进行测试.
  * 若环境搭建成功，会看到以下输出：
  * Bill{id=1, user_id=123, user_name='test_user', fee=60, create_time=Thu May 02 15:30:00 CST 2024}
- * SpecificBill{id=1, userId=123, startTime=Thu May 02 15:30:00 CST 2024, roomId=111, endTime=Thu May 02 19:30:00 CST 2024, windSpeed=2, temperature=25, shutdownTime=Thu May 02 19:30:00 CST 2024, reason=1, extraFee=50}
+ * SpecificBill{id=1, userId=123, requestTime=Thu May 02 15:30:00 CST 2024, startTime=Thu May 16 13:38:45 CST 2024, roomId=111, endTime=null, windSpeed=2, temperature=25, duration=120, reason=null, extraFee=50, currentFee=0.0, feeRate=1.0}
  * 此时数据库中也有相应的记录
- *
+ * <p>
  * 注意使用debug模式运行，点击Console会有打印信息，否则输出比较混乱
  */
 
@@ -49,15 +49,15 @@ public class MybatisTest {
         String dateString = "2024-05-02 15:30";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date createTime = dateFormat.parse(dateString);
+
+        Date currentTime=new Date(); //当前时间
         Bill bill = new Bill(1, 123, "test_user", 60, createTime);
-        String dateString2 = "2024-05-02 19:30";
-        Date shutDownTime = dateFormat.parse(dateString2);
-        SpecificBill specificBill = new SpecificBill(1, 123, createTime, 111,
-                shutDownTime, 2, 25, shutDownTime, 1, 50);
+        SpecificBill specificBill = new SpecificBill(1, 123, createTime, currentTime, 111,
+                null, 2, 25, 120, null, 50, 0f, 1f);
 
         QueryWrapper queryWrapper = new QueryWrapper();
         // where子句
-        queryWrapper.eq("id",1);
+        queryWrapper.eq("id", 1);
 
         // 删除id字段为1的记录防治重复插入
         billService.remove(queryWrapper);
@@ -69,12 +69,12 @@ public class MybatisTest {
         specificBillService.save(specificBill);
 
         //查询刚插入的记录，注意若有多条满足查询要求的结果需要使用selectList方法
-        Bill billResult=billService.getBaseMapper().selectOne(queryWrapper);
+        Bill billResult = billService.getBaseMapper().selectOne(queryWrapper);
         //或者使用getById方法
         // Bill billResult = billService.getById(1);
         System.out.println(billResult.toString());
 
-        SpecificBill specificBill1Result=specificBillService.getBaseMapper().selectOne(queryWrapper);
+        SpecificBill specificBill1Result = specificBillService.getBaseMapper().selectOne(queryWrapper);
         System.out.println(specificBill1Result.toString());
     }
 
