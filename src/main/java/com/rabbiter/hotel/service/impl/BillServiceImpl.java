@@ -1,19 +1,25 @@
 package com.rabbiter.hotel.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rabbiter.hotel.domain.Bill;
+import com.rabbiter.hotel.domain.SpecificBill;
 import com.rabbiter.hotel.dto.DateSectionDTO;
 import com.rabbiter.hotel.dto.ReturnBillDTO;
 import com.rabbiter.hotel.mapper.BillMapper;
+import com.rabbiter.hotel.mapper.SpecificBillMapper;
 import com.rabbiter.hotel.service.BillService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @author 你的名字
- * @date: 日期
+ * @author 谭磊
+ * @date: 2024.5.17
  * Description:
  */
 
@@ -69,11 +75,36 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      * @param userID
      * @return 总开销
      */
+
+    @Resource
+    private SpecificBillMapper specificBillMapper;
+
+
     @Override
     public ReturnBillDTO getBill(Integer userID){
-        return null;
-    }
+        // 查询用户最近一次的账单记录
+        Bill latestBill = getOne(new QueryWrapper<Bill>().eq("user_id", userID).orderByDesc("create_time").last("limit 1"));
 
+        if (latestBill == null) {
+            // 没有历史账单，无费用
+            return new ReturnBillDTO(null, userID, null, 0, null);
+        }
+
+        // 获取所有从最后一次账单时间开始的specific_bill记录
+        List<SpecificBill> specificBills = specificBillMapper.selectList(
+                new QueryWrapper<SpecificBill>()
+                        .eq("user_id", userID)
+                        .ge("start_time", latestBill.getCreate_time())
+        );
+
+        // 计算空调使用费用
+        int acCost = specificBills.stream().mapToInt(bill -> calculateACCost(bill)).sum();
+
+        // 总费用 = 房费 + 空调费用
+        int totalCost = latestBill.getFee() + acCost;
+
+        return new ReturnBillDTO(latestBill.getId(), userID, latestBill.getUser_name(), totalCost, latestBill.getCreate_time());
+    }
 
     /**
      * 查找该用户存在的所有的bill信息，可能为空
@@ -83,7 +114,9 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public List<ReturnBillDTO> getAllBill(Integer userID){
-        return null;
+        return list(new QueryWrapper<Bill>().eq("user_id", userID)).stream()
+                .map(bill -> new ReturnBillDTO(bill.getId(), bill.getUser_id(), bill.getUser_name(), bill.getFee(), bill.getCreate_time()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -94,7 +127,8 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public ReturnBillDTO getLatestBill(Integer userID){
-        return null;
+        Bill latestBill = getOne(new QueryWrapper<Bill>().eq("user_id", userID).orderByDesc("create_time").last("limit 1"));
+        return latestBill == null ? null : new ReturnBillDTO(latestBill.getId(), latestBill.getUser_id(), latestBill.getUser_name(), latestBill.getFee(), latestBill.getCreate_time());
     }
 
     /**
@@ -106,8 +140,19 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public List<ReturnBillDTO> getDateSectionBill(DateSectionDTO dateSectionDTO){
-        return null;
+        return list(new QueryWrapper<Bill>().between("create_time", dateSectionDTO.getInTime(), dateSectionDTO.getLeaveTime())).stream()
+                .map(bill -> new ReturnBillDTO(bill.getId(), bill.getUser_id(), bill.getUser_name(), bill.getFee(), bill.getCreate_time()))
+                .collect(Collectors.toList());
     }
 
+    private int calculateACCost(SpecificBill bill) {
+        long duration = Duration.between(bill.getStartTime().toInstant(), bill.getEndTime().toInstant()).toMinutes();
+        long hours = (duration + 59) / 60; // 确保即使不足一小时也按一小时计费
+        int baseCost = 1; // 默认温度下的基本成本
+        int temperatureCost = Math.abs(bill.getTemperature() - 25); // 温度调整费用
+        int windCost = bill.getWindSpeed(); // 风速成本
 
+        int totalCostPerHour = baseCost + temperatureCost + windCost;
+        return (int) (totalCostPerHour * hours);
+    }
 }
