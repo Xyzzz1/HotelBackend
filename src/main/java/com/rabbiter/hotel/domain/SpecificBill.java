@@ -22,6 +22,13 @@ public class SpecificBill {
     @TableField(value = "user_id")
     private Integer userId;
 
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @TableField(value = "request_time")
+    private Date requestTime;
+
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @TableField(value = "start_time")
@@ -41,10 +48,8 @@ public class SpecificBill {
     @TableField(value = "temperature")
     private Integer temperature;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @TableField(value = "shutdown_time")
-    private Date shutdownTime;
+    @TableField(value = "duration")
+    private Integer duration;
 
     @TableField(value = "reason")
     private Integer reason;
@@ -52,22 +57,31 @@ public class SpecificBill {
     @TableField(value = "extra_fee")
     private Integer extraFee;
 
+    @TableField(value = "current_fee")
+    private Float currentFee;
+
+    @TableField(value = "fee_rate")
+    private Float feeRate;
+
 
     public SpecificBill() {
     }
 
-    public SpecificBill(Integer id, Integer userId, Date startTime, Integer roomId, Date endTime, Integer windSpeed,
-                        Integer temperature, Date shutdownTime, Integer reason, Integer extraFee) {
+    public SpecificBill(Integer id, Integer userId, Date requestTime,Date startTime, Integer roomId, Date endTime, Integer windSpeed,
+                        Integer temperature, Integer duration, Integer reason, Integer extraFee,Float currentFee,Float feeRate) {
         this.id = id;
         this.userId = userId;
+        this.requestTime=requestTime;
         this.startTime = startTime;
         this.roomId = roomId;
         this.endTime = endTime;
         this.windSpeed = windSpeed;
         this.temperature = temperature;
-        this.shutdownTime = shutdownTime;
+        this.duration = duration;
         this.reason = reason;
         this.extraFee = extraFee;
+        this.currentFee=currentFee;
+        this.feeRate=feeRate;
     }
 
     public Integer getId() {
@@ -84,6 +98,14 @@ public class SpecificBill {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public Date getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(Date requestTime) {
+        this.requestTime = requestTime;
     }
 
     public Date getStartTime() {
@@ -126,12 +148,12 @@ public class SpecificBill {
         this.temperature = temperature;
     }
 
-    public Date getShutdownTime() {
-        return shutdownTime;
+    public Integer getDuration() {
+        return duration;
     }
 
-    public void setShutdownTime(Date shutdownTime) {
-        this.shutdownTime = shutdownTime;
+    public void setDuration(Integer duration) {
+        this.duration = duration;
     }
 
     public Integer getReason() {
@@ -150,19 +172,40 @@ public class SpecificBill {
         this.extraFee = extraFee;
     }
 
+    public Float getCurrentFee() {
+        return currentFee;
+    }
+
+    public void setCurrentFee(Float currentFee) {
+        this.currentFee = currentFee;
+    }
+
+    public Float getFeeRate() {
+        return feeRate;
+    }
+
+    public void setFeeRate(Float feeRate) {
+        this.feeRate = feeRate;
+    }
+
+
+
     @Override
     public String toString() {
         return "SpecificBill{" +
                 "id=" + id +
                 ", userId=" + userId +
+                ", requestTime=" + requestTime +
                 ", startTime=" + startTime +
                 ", roomId=" + roomId +
                 ", endTime=" + endTime +
                 ", windSpeed=" + windSpeed +
                 ", temperature=" + temperature +
-                ", shutdownTime=" + shutdownTime +
+                ", duration=" + duration +
                 ", reason=" + reason +
                 ", extraFee=" + extraFee +
+                ", currentFee=" + currentFee +
+                ", feeRate=" + feeRate +
                 '}';
     }
 }
