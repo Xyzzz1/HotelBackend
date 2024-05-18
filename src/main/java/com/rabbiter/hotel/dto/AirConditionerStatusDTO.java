@@ -14,18 +14,23 @@ import java.util.Objects;
  */
 public class AirConditionerStatusDTO {
 
-    private int roomID;
-    private int userID;
+    private Integer roomID;
+    private Integer userID;
     private boolean powerOn;
-    private int targetTemperature; //设定的温度
-    private int windSpeed;
-    private int additionalFee;
-    private int targetDuration; //设定的空调使用时长(秒)
+    private Integer targetTemperature; //设定的温度
+    private Integer windSpeed;
+    private Integer additionalFee;
+    private Integer targetDuration; //设定的空调使用时长(秒)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private Date requestTime;
 
-    private int mode;//0制热，1制冷Ï
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private Date powerOnTime;
+
+
+    private Integer mode;//0制热，1制冷
 
 
     public AirConditionerStatusDTO() {
@@ -33,9 +38,9 @@ public class AirConditionerStatusDTO {
     }
 
     // 构造方法
-    public AirConditionerStatusDTO(int roomID, int userID, boolean powerOn, int targetTemperature,
-                                   int windSpeed, int additionalFee, int targetDuration,
-                                   Date requestTime, int mode) {
+    public AirConditionerStatusDTO(Integer roomID, Integer userID, boolean powerOn, Integer targetTemperature,
+                                   Integer windSpeed, Integer additionalFee, Integer targetDuration,
+                                   Date requestTime, Integer mode) {
         this.roomID = roomID;
         this.userID = userID;
         this.powerOn = powerOn;
@@ -46,19 +51,20 @@ public class AirConditionerStatusDTO {
         this.requestTime = requestTime;
         this.mode = mode;
     }
-    public int getRoomID() {
+
+    public Integer getRoomID() {
         return roomID;
     }
 
-    public void setRoomID(int roomID) {
+    public void setRoomID(Integer roomID) {
         this.roomID = roomID;
     }
 
-    public int getUserID() {
+    public Integer getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(Integer userID) {
         this.userID = userID;
     }
 
@@ -70,35 +76,42 @@ public class AirConditionerStatusDTO {
         this.powerOn = powerOn;
     }
 
-    public int getTargetTemperature() {
+    public Integer getTargetTemperature() {
         return targetTemperature;
     }
 
-    public void setTargetTemperature(int targetTemperature) {
+    public void setTargetTemperature(Integer targetTemperature) {
         this.targetTemperature = targetTemperature;
     }
 
-    public int getWindSpeed() {
+    public Integer getWindSpeed() {
         return windSpeed;
     }
 
-    public void setWindSpeed(int windSpeed) {
+    public void setWindSpeed(Integer windSpeed) {
         this.windSpeed = windSpeed;
     }
 
-    public int getAdditionalFee() {
+    public Integer getAdditionalFee() {
         return additionalFee;
     }
 
-    public void setAdditionalFee(int additionalFee) {
+    public void setAdditionalFee(Integer additionalFee) {
         this.additionalFee = additionalFee;
     }
 
-    public int getTargetDuration() {
+    public void setPowerOnTime(Date powerOnTime){
+        this.powerOnTime=powerOnTime;
+    }
+    public Date getPowerOnTime(){
+        return this.powerOnTime;
+    }
+
+    public Integer getTargetDuration() {
         return targetDuration;
     }
 
-    public void setTargetDuration(int targetDuration) {
+    public void setTargetDuration(Integer targetDuration) {
         this.targetDuration = targetDuration;
     }
 
@@ -110,12 +123,12 @@ public class AirConditionerStatusDTO {
         this.requestTime = requestTime;
     }
 
-    public int getPowerOnTime() {
-        return mode;
+    public void setMode(Integer mode) {
+        this.mode = mode;
     }
 
-    public void setMode(int mode) {
-        this.mode = mode;
+    public Integer getMode() {
+        return this.mode;
     }
 
 
@@ -130,6 +143,7 @@ public class AirConditionerStatusDTO {
                 ", additionalFee=" + additionalFee +
                 ", targetDuration=" + targetDuration +
                 ", requestTime=" + requestTime +
+                ", powerOnTime=" + powerOnTime +
                 ", mode=" + mode +
                 '}';
     }
@@ -145,17 +159,11 @@ public class AirConditionerStatusDTO {
         AirConditionerStatusDTO other = (AirConditionerStatusDTO) obj;
         return roomID == other.roomID &&
                 userID == other.userID &&
-                powerOn == other.powerOn &&
-                targetTemperature == other.targetTemperature &&
-                windSpeed == other.windSpeed &&
-                additionalFee == other.additionalFee &&
-                targetDuration == other.targetDuration &&
-                mode == other.mode &&
                 Objects.equals(requestTime, other.requestTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomID, userID, powerOn, targetTemperature, windSpeed, additionalFee, targetDuration, requestTime, mode);
+        return Objects.hash(roomID, userID, requestTime);
     }
 }
