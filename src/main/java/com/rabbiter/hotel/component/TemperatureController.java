@@ -55,7 +55,7 @@ public class TemperatureController {
             }
 
             QueryWrapper<Room> roomQueryWrapper = new QueryWrapper();
-            roomQueryWrapper.eq("state",1).select("number");
+            roomQueryWrapper.eq("state",1).select("id");
             List<Object> roomNumberList = roomService.getBaseMapper().selectObjs(roomQueryWrapper);
             roomList=new ArrayList<>();
             for(Object number:roomNumberList)
@@ -102,7 +102,7 @@ public class TemperatureController {
                 SseEmitterServer.sendMessage(Integer.toString(roomID), message);
                 logger.info("/indoor temperature change: roomID"+roomID+", " + message);
 
-                if (indoorTemp.get(roomID) == airConditionerStatusDTO.getTargetTemperature()) {//到达目标温度
+                if (indoorTemp.get(roomID).doubleValue() == airConditionerStatusDTO.getTargetTemperature()) {//到达目标温度
                     //关机
                 }
             }
@@ -128,8 +128,6 @@ public class TemperatureController {
             indoorTemp.put(roomID, indoorTemp.get(roomID) + 0.5);
         } else if (indoorTemp.get(roomID) > initIndoorTemp.get(roomID))
             indoorTemp.put(roomID, indoorTemp.get(roomID) - 0.5);
-        else
-            return;
 
         //发送sse通知前端
         String message = createSSEMessage(indoorTemp.get(roomID));
