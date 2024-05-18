@@ -7,6 +7,7 @@ import com.rabbiter.hotel.staticfield.PowerManager;
 import org.json.JSONException;
 
 import javax.xml.crypto.Data;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -73,12 +74,20 @@ public class QueueController {
      * @return 标识，从服务/等待队列中移除
      */
     public int deQueue(AirConditionerStatusDTO airConditionerStatusDTO, int reason) {
-        if(QueueDTO.waitQueue.contains(airConditionerStatusDTO)){
+        try {
+            PowerManager.powerOff(airConditionerStatusDTO, reason);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (QueueDTO.waitQueue.contains(airConditionerStatusDTO)) {
             removeFromWait(airConditionerStatusDTO);
             return WAIT;
-        }else{
+        } else {
             removeFromService(airConditionerStatusDTO);
-            addToService(selectNew());
+            AirConditionerStatusDTO newDTO = selectNew();
+            if(newDTO!=null)
+                addToService(newDTO);
             return SERVICE;
         }
     }
@@ -149,6 +158,11 @@ public class QueueController {
                 if (!QueueDTO.serviceQueue.contains(dto))
                     return;
                 removeFromService(dto);
+                try {
+                    PowerManager.powerOff(dto, 1);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 AirConditionerStatusDTO newDTO = selectNew();
                 if (newDTO != null) {
                     removeFromWait(newDTO);
@@ -264,7 +278,13 @@ public class QueueController {
             if (QueueDTO.serviceQueue.contains(dto))
                 return;
             semaphoreService.acquire();
+            dto.setPowerOnTime(new Date());
             QueueDTO.serviceQueue.add(dto);
+            try {
+                PowerManager.powerOn(dto);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -289,6 +309,11 @@ public class QueueController {
                 return;
             semaphoreWait.acquire();
             QueueDTO.waitQueue.add(dto);
+            try {
+                PowerManager.waiting(dto);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
