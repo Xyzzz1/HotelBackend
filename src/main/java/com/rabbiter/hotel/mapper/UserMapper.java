@@ -9,6 +9,4 @@ import com.rabbiter.hotel.domain.User;
  * Description：
  */
 public interface UserMapper extends BaseMapper<User> {
-
-
 }
