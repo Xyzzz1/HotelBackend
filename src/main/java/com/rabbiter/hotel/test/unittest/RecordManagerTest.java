@@ -30,7 +30,7 @@ public class RecordManagerTest {
 
     @Test
     public void test() throws ParseException {
-        rm=new RecordManager(specificBillService);
+//        rm=new RecordManager(specificBillService);
 
         //先插入一条记录 ,用户id为1的记录
         String dateString = "2024-05-02 15:30";

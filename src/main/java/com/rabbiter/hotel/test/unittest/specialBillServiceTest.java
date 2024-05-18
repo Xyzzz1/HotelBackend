@@ -39,8 +39,8 @@ public class specialBillServiceTest {
         Bill bill = new Bill(1, 123, "test_user", 60, createTime);
         String dateString2 = "2024-05-02 19:30";
         Date shutDownTime = dateFormat.parse(dateString2);
-        SpecificBill specificBill = new SpecificBill(1, 123, createTime, 111,
-                shutDownTime, 2, 25, shutDownTime, 1, 50);
+        SpecificBill specificBill = new SpecificBill(2, 123, createTime,createTime, 111,
+                shutDownTime, 2, 25, 120, 1, 50,200.5f,1f);
 
         QueryWrapper queryWrapper = new QueryWrapper();
         // where子句
