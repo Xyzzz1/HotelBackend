@@ -194,61 +194,7 @@ public class AirConditionerController {
         return null;
     }
 
-    private String createSSEMessage(Integer roomID, boolean isTurnOn, Integer reason) throws JSONException {
-        /*
-        reason 枚举类型
-        1 计时器到时自动关闭
-        2 用户主动关闭
-        3 到达指定温度
-        4 被抢占关闭
-        5 意外关闭
-        6 用户改变参数
-        -1 开机
-        */
-        JSONObject innerObj = new JSONObject();
-        innerObj.put("serviceQueueLength", QueueDTO.serviceQueue.size());
-        innerObj.put("requestQueueSize", QueueDTO.waitQueue.size());
 
-        JSONObject obj = new JSONObject();
-        obj.put("controllerType", "status-update");
-        obj.put("source", innerObj);
-        obj.put("timestamp", System.currentTimeMillis());
-        obj.put("roomId", roomID);
-        obj.put("powerOn", isTurnOn);
-        obj.put("reason", reason);
-
-        return obj.toString();
-    }
-
-
-    private void processQueue() throws JSONException {
-        /*
-        List<AirConditionerStatusDTO> currentServiceQueue;
-        if (QueueDTO.MODE == QueueDTO.PRIORITY) {
-            QueueControllerOld priorityQueueControllerOld = new PriorityOldQueue();
-            currentServiceQueue = priorityQueueControllerOld.getUser();
-        }else{
-            QueueControllerOld pollQueueControllerOld = new PollOldQueue();
-            currentServiceQueue= pollQueueControllerOld.getUser();
-        }
-        List<AirConditionerStatusDTO> startServiceList=getStartService(currentServiceQueue);
-        List<AirConditionerStatusDTO> removedServiceList=getRemovedService(currentServiceQueue);
-        QueueDTO.lastServiceQueue=currentServiceQueue;
-
-        // 更新调度
-        for( AirConditionerStatusDTO startDto:startServiceList ){
-            String message = createSSEMessage(startDto.getRoomID(), true, -1);
-            SseEmitterServer.sendMessage(Integer.toString(startDto.getRoomID()), message);
-            //插入数据库开机记录
-        }
-
-        for(AirConditionerStatusDTO removedDto:removedServiceList){
-            String message = createSSEMessage(removedDto.getRoomID(), false, 4);
-            SseEmitterServer.sendMessage(Integer.toString(removedDto.getRoomID()), message);
-            //插入关机记录
-        }
-        */
-    }
 
 
 }

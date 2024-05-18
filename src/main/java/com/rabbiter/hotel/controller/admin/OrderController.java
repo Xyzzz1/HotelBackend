@@ -4,13 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
 import com.rabbiter.hotel.domain.Order;
+import com.rabbiter.hotel.domain.SpecificBill;
 import com.rabbiter.hotel.domain.User;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.service.RoomService;
+import com.rabbiter.hotel.service.SpecificBillService;
 import com.rabbiter.hotel.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,6 +31,8 @@ public class OrderController {
     private RoomService roomService;
     @Resource
     private UserService userService;
+    @Resource
+    private SpecificBillService specificBillService;
 
     @GetMapping("/listOrders")
     public CommonResult<List<Order>> listOrders(@RequestParam("orderFlags") List<Integer> flags) {
@@ -89,6 +94,19 @@ public class OrderController {
             commonResult.setData("办理入住失败");
         }
 
+        return commonResult;
+    }
+
+    @GetMapping("/specificBills")
+    public CommonResult<List<SpecificBill>> getSpecificBills(@RequestParam("userId") Integer userId){
+        CommonResult<List<SpecificBill>> commonResult = new CommonResult<>();
+        QueryWrapper<SpecificBill> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("user_id",userId);
+        List<SpecificBill> bilList= specificBillService.getBaseMapper().selectList(queryWrapper);
+
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        commonResult.setData(bilList);
         return commonResult;
     }
 }
