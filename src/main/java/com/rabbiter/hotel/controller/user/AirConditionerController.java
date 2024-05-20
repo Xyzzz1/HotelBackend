@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/service/conditioner")
+@RequestMapping("/user/conditioner")
 public class AirConditionerController {
     private final Logger logger = LoggerFactory.getLogger(SseEmitterServer.class);
     private QueueController queueController = new QueueController();
@@ -33,7 +33,7 @@ public class AirConditionerController {
     @Resource
     private OrderService orderService;
 
-    @GetMapping(value = "/getRoomID")
+    @GetMapping(value = "/getRoomId")
     public CommonResult<Integer> getRoomID() {
         CommonResult<Integer> commonResult = new CommonResult<>();
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
@@ -90,14 +90,14 @@ public class AirConditionerController {
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
         airConditionerStatusDTO.setUserID(user.getId());
         CommonResult<String> commonResult = new CommonResult<>();
+        queueController.enQueue(airConditionerStatusDTO);
         if (queueController.enQueue(airConditionerStatusDTO) == QueueController.SERVICE) {
             commonResult.setData("加入服务队列");
-            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
         } else {
 
             commonResult.setData("加入等待队列");
-            commonResult.setCode(ConstantCode.WAITING);
         }
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         logger.info("/turnOn: " + commonResult.toString());
         return commonResult;
@@ -155,7 +155,7 @@ public class AirConditionerController {
             airConditionerStatusDTO = findServer(1, roomID);
             if (airConditionerStatusDTO == null) {
                 commonResult.setData("当前空调并未开机。");
-                commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+                commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
                 commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
                 return commonResult;
             }

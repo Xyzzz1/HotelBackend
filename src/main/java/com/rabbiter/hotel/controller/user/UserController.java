@@ -58,7 +58,7 @@ public class UserController {
     public CommonResult<String> login(@RequestBody LoginDTO loginDTO) {
         CommonResult<String> commonResult = new CommonResult<>();
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("phone", loginDTO.getPhone());
+        queryWrapper.eq("email", loginDTO.getEmail());
         String md5Password = SecureUtil.md5(loginDTO.getPassword());
         queryWrapper.eq("password", md5Password);
         User user = userService.getBaseMapper().selectOne(queryWrapper);
@@ -128,7 +128,7 @@ public class UserController {
         return commonResult;
     }
 
-    @GetMapping("/userDetail")
+    @GetMapping("/getUserInfo")
     public CommonResult<ReturnUserDTO> userDetail() {
         CommonResult<ReturnUserDTO> commonResult = new CommonResult();
         ReturnUserDTO returnUser = new ReturnUserDTO();

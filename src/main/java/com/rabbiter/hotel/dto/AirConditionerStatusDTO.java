@@ -38,12 +38,12 @@ public class AirConditionerStatusDTO {
     }
 
     // 构造方法
-    public AirConditionerStatusDTO(Integer roomID, Integer userID, boolean powerOn, Integer targetTemperature,
+    public AirConditionerStatusDTO(Integer roomID, Integer userID, boolean on, Integer targetTemperature,
                                    Integer windSpeed, Integer additionalFee, Integer targetDuration,
                                    Date requestTime, Integer mode) {
         this.roomID = roomID;
         this.userID = userID;
-        this.powerOn = powerOn;
+        this.powerOn = on;
         this.targetTemperature = targetTemperature;
         this.windSpeed = windSpeed;
         this.additionalFee = additionalFee;

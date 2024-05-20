@@ -1,7 +1,4 @@
 spring:
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: Asia/Shanghai
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -13,6 +10,7 @@ spring:
       connection-error-retry-attempts: 0
       fail-fast: true
       break-after-acquire-failure: true
+
 mybatis-plus:
   mapper-locations:
     - classpath:mapper/*.xml
@@ -21,5 +19,7 @@ mybatis-plus:
     db-config:
       id-type: auto
     banner: false
+
 server:
   port: 9151
+

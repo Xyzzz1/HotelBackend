@@ -32,7 +32,7 @@ public class PowerManager {
 
     public static void waiting(AirConditionerStatusDTO airConditionerStatusDTO) throws  JSONException{
         airConditionerStatusDTO.setPowerOn(true);
-        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -2);
+        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -3);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
         logger.info("/waiting: " + airConditionerStatusDTO.getRoomID());
     }

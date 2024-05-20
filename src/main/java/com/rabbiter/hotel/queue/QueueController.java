@@ -5,9 +5,6 @@ import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
 import com.rabbiter.hotel.staticfield.PowerManager;
 import org.json.JSONException;
-
-import javax.xml.crypto.Data;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +41,7 @@ public class QueueController {
         int windSpeed = airConditionerStatusDTO.getWindSpeed();
         int lowestServiceQueueWindSpeed = getLowestServiceQueueWindSpeed();
         if (windSpeed < lowestServiceQueueWindSpeed) { //小于最低风速的情况，直接移入等待队列,不分配时间片
+            /*
             try {
                 semaphoreWait.acquire();
                 QueueDTO.waitQueue.add(airConditionerStatusDTO);
@@ -52,15 +50,17 @@ public class QueueController {
             } finally {
                 semaphoreWait.release();
             }
+             */
+            addToWait(airConditionerStatusDTO);
             return WAIT;
         } else if (windSpeed > lowestServiceQueueWindSpeed) { //优先级调度
             AirConditionerStatusDTO removeDTO = priorityDispatch(airConditionerStatusDTO); //将被抢占的服务队列对象
             removeFromService(removeDTO);
-            addToWait(removeDTO, WAIT);
+            addToWait(removeDTO);
             addToService(airConditionerStatusDTO);
             return SERVICE;
         } else { //轮询调度
-            addToWait(airConditionerStatusDTO, POLL);
+            addToWait(airConditionerStatusDTO);
             return WAIT;
         }
     }
@@ -86,63 +86,45 @@ public class QueueController {
         } else {
             removeFromService(airConditionerStatusDTO);
             AirConditionerStatusDTO newDTO = selectNew();
-            if(newDTO!=null)
+            if (newDTO != null)
                 addToService(newDTO);
             return SERVICE;
         }
     }
 
-
     /**
-     * 时间片调度时间片到期执行的任务:找到服务队列风速与该dto相同的服务对象分配时间片，若不存在，选择风速最低放入等待队列
+     * 移入等待队列的对象时间片到期后执行的任务
      *
-     * @param dto
-     * @return
+     * @param airConditionerStatusDTO
      */
-    Runnable taskForPoll(AirConditionerStatusDTO dto) {
-        return () -> {
-            try {
-                semaphoreTask.acquire();
-                if (QueueDTO.serviceQueue.contains(dto))
-                    return;
-
-                AirConditionerStatusDTO nextDTO = null;
-                for (AirConditionerStatusDTO serviceDTO : QueueDTO.serviceQueue) {
-                    if (serviceDTO.getWindSpeed() == dto.getWindSpeed()) {
-                        nextDTO = serviceDTO;
-                        break;
-                    }
+    private void enQueueTask(AirConditionerStatusDTO airConditionerStatusDTO) {
+        if (!QueueDTO.isFull()) { //资源数够用之间加入服务队列
+            addToService(airConditionerStatusDTO);
+        }
+        int windSpeed = airConditionerStatusDTO.getWindSpeed();
+        int lowestServiceQueueWindSpeed = getLowestServiceQueueWindSpeed();
+        if (windSpeed < lowestServiceQueueWindSpeed) { //小于最低风速的情况，直接移入等待队列,不分配时间片
+            addToWait(airConditionerStatusDTO);
+        } else if (windSpeed > lowestServiceQueueWindSpeed) { //优先级调度
+            AirConditionerStatusDTO removeDTO = priorityDispatch(airConditionerStatusDTO); //将被抢占的服务队列对象
+            removeFromService(removeDTO);
+            addToWait(removeDTO);
+            addToService(airConditionerStatusDTO);
+        } else { //轮询调度
+            AirConditionerStatusDTO seizedDTO = null;
+            for (AirConditionerStatusDTO removedDTO : QueueDTO.serviceQueue) {
+                if (removedDTO.getWindSpeed() == windSpeed) {
+                    seizedDTO = removedDTO;
+                    break;
                 }
-                if (nextDTO != null) {
-                    removeFromService(nextDTO);
-                    addToWait(nextDTO, POLL);
-                } else { //选择风速最低
-                    nextDTO = QueueDTO.serviceQueue.peek();
-                    for (AirConditionerStatusDTO serviceDTO : QueueDTO.serviceQueue) {
-                        if (serviceDTO.getWindSpeed() < nextDTO.getWindSpeed()) {
-                            nextDTO = serviceDTO;
-                        }
-                    }
-                    removeFromService(nextDTO);
-                    addToWait(nextDTO, WAIT);
-                }
-                removeFromWait(dto);
-                addToService(dto);
-
-                //test
-                System.out.println("POLL" + dto.getRoomID() + ": time slice expire hit, current time:" + new Date());
-                System.out.println("service queue: " + QueueDTO.serviceQueue);
-                System.out.println("wait queue: " + QueueDTO.waitQueue);
-                System.out.println(timerManager.getTimers().keySet());
-                System.out.println("");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                semaphoreTask.release();
             }
-        };
-
+            removeFromService(seizedDTO);
+            removeFromWait(airConditionerStatusDTO);
+            addToWait(seizedDTO);
+            addToService(airConditionerStatusDTO);
+        }
     }
+
 
 
     /**
@@ -197,17 +179,7 @@ public class QueueController {
                 semaphoreTask.acquire();
                 if (QueueDTO.serviceQueue.contains(dto))
                     return;
-                if (QueueDTO.isFull()) {
-                    AirConditionerStatusDTO seizedDTO = QueueDTO.serviceQueue.get(0);
-                    for (AirConditionerStatusDTO removeDTO : QueueDTO.serviceQueue) {
-                        if (removeDTO.getWindSpeed() < seizedDTO.getWindSpeed())
-                            seizedDTO = removeDTO;
-                    }
-                    removeFromService(seizedDTO);
-                    addToWait(seizedDTO, WAIT);
-                }
-                removeFromWait(dto);
-                addToService(dto);
+                enQueueTask(dto);
 
                 //test
                 System.out.println("WAIT" + dto.getRoomID() + ": time slice expire hit, current time:" + new Date());
@@ -301,9 +273,8 @@ public class QueueController {
      * 优先级较低，轮询时加入等待队列会调度，新建一个定时器，到期任务分别执行taskForWait，taskForPoll
      *
      * @param dto
-     * @param type WAIT=1或POLL=3，区分时间片到期后执行的任务
      */
-    private void addToWait(AirConditionerStatusDTO dto, int type) {
+    private void addToWait(AirConditionerStatusDTO dto) {
         try {
             if (QueueDTO.waitQueue.contains(dto) || dto.getTargetDuration() == 0)
                 return;
@@ -320,11 +291,8 @@ public class QueueController {
             semaphoreWait.release();
         }
 
-        if (type == WAIT) {
-            timerManager.addObjectWithTimer(dto, Configuration.timeSlice / Configuration.timeChangeRate, TimeUnit.SECONDS, taskForWait(dto));
-        } else if (type == POLL) {
-            timerManager.addObjectWithTimer(dto, Configuration.timeSlice / Configuration.timeChangeRate, TimeUnit.SECONDS, taskForPoll(dto));
-        }
+        timerManager.addObjectWithTimer(dto, Configuration.timeSlice / Configuration.timeChangeRate, TimeUnit.SECONDS, taskForWait(dto));
+
 
     }
 

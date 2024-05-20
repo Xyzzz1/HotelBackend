@@ -36,7 +36,7 @@ public class RoomController {
     @Resource
     private UserService userService;
 
-    @PostMapping(value = "/listRoom")
+    @PostMapping(value = "/listAllSpareRoom")
     public CommonResult<List<ReturnRoomDTO>> listRoom(@RequestBody SearchRoomDTO searchRoomDTO) {
         CommonResult<List<ReturnRoomDTO>> commonResult = new CommonResult<>();
         DateSectionDTO dateSectionDTO = new DateSectionDTO(searchRoomDTO.getInTime(), searchRoomDTO.getLeaveTime());
@@ -73,7 +73,7 @@ public class RoomController {
         return commonResult;
     }
 
-    @GetMapping(value = "/listAllSpareRoom")
+    @GetMapping(value = "/listRoom")
     public CommonResult<List<ReturnRoomDTO>> listRoom() {
         CommonResult<List<ReturnRoomDTO>> commonResult = new CommonResult<>();
         Date earliestDate = new Date(0);

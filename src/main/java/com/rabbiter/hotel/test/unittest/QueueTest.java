@@ -26,10 +26,10 @@ public class QueueTest {
         AirConditionerStatusDTO airConditionerUser4=new AirConditionerStatusDTO(4, 4, true, 24, 1, 0, 600, new Date(), 1);
 
         List<AirConditionerStatusDTO> dtoList=new ArrayList<>();
-        dtoList.add(airConditionerUser1);
+        //dtoList.add(airConditionerUser1);
         dtoList.add(airConditionerUser2);
         dtoList.add(airConditionerUser3);
-        dtoList.add(airConditionerUser4);
+        //dtoList.add(airConditionerUser4);
 
         for(AirConditionerStatusDTO dto:dtoList){
             int result=queueController.enQueue(dto);

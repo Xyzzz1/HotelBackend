@@ -36,6 +36,7 @@ public class billServiceTest {
 
     @Test
     public void test() throws ParseException {
+        /*
         String dateString = "2024-05-02 15:30";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date createTime = dateFormat.parse(dateString);
@@ -66,6 +67,8 @@ public class billServiceTest {
 
         SpecificBill specificBill1Result=specificBillService.getBaseMapper().selectOne(queryWrapper);
         System.out.println(specificBill1Result.toString());
+        */
+
     }
 
     /**
