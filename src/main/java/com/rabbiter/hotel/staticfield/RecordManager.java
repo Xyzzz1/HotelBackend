@@ -54,7 +54,7 @@ public class RecordManager {
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper);
 
-        if(pre_specificBill.getEndTime()!=null){
+        if (pre_specificBill.getEndTime() != null) {
             return;
         }
 
@@ -187,16 +187,15 @@ public class RecordManager {
      * @return
      */
     private float calFee(SpecificBill preSpecificBill) {
-        int duration = (int) (preSpecificBill.getEndTime().getTime() - preSpecificBill.getStartTime().getTime())* Configuration.timeChangeRate/1000; //总秒数
-        int minutes=(duration+59)/60;
+        int duration = (int) (preSpecificBill.getEndTime().getTime() - preSpecificBill.getStartTime().getTime()) * Configuration.timeChangeRate / 1000; //总秒数
+        int minutes = (duration + 59) / 60;
 
         if (preSpecificBill.getWindSpeed() == 3) {
-            return roundToTwoVector((float) minutes);
-        }else if(preSpecificBill.getWindSpeed() ==2){
-            return roundToTwoVector((float) minutes/2);
-        }
-        else{
-            return roundToTwoVector((float) minutes/3);
+            return roundToTwoVector((float) minutes * preSpecificBill.getFeeRate());
+        } else if (preSpecificBill.getWindSpeed() == 2) {
+            return roundToTwoVector((float) minutes * preSpecificBill.getFeeRate() / 2);
+        } else {
+            return roundToTwoVector((float) minutes * preSpecificBill.getFeeRate() / 3);
         }
 
     }
@@ -207,7 +206,7 @@ public class RecordManager {
      * @param num
      * @return
      */
-    private float roundToTwoVector(float num){
+    private float roundToTwoVector(float num) {
         return Math.round(num * 100.0f) / 100.0f;
     }
 }
