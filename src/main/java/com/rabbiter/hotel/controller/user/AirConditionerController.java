@@ -12,6 +12,7 @@ import com.rabbiter.hotel.queue.QueueController;
 import com.rabbiter.hotel.staticfield.PowerManager;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.sse.SseEmitterServer;
+import com.rabbiter.hotel.staticfield.RecordManager;
 import com.rabbiter.hotel.util.WebUtils;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class AirConditionerController {
 
     @Resource
     private OrderService orderService;
+
 
     @GetMapping(value = "/getRoomId")
     public CommonResult<Integer> getRoomID() {

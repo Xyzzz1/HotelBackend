@@ -100,11 +100,11 @@ public class OrderController {
     }
 
     @GetMapping("/specificBills")
-    public CommonResult<List<SpecificBill>> getSpecificBills(@RequestParam("userId") Integer userId){
+    public CommonResult<List<SpecificBill>> getSpecificBills(@RequestParam("userId") Integer userId) {
         CommonResult<List<SpecificBill>> commonResult = new CommonResult<>();
-        QueryWrapper<SpecificBill> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("user_id",userId);
-        List<SpecificBill> bilList= specificBillService.getBaseMapper().selectList(queryWrapper);
+        QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        List<SpecificBill> bilList = specificBillService.getBaseMapper().selectList(queryWrapper);
 
         commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
@@ -113,31 +113,32 @@ public class OrderController {
     }
 
     @PostMapping("/checkOut")
-    public CommonResult<String> checkOut(@RequestParam("roomId") Integer roomId,@RequestParam("realPrice") Double realPrice){
-        CommonResult<String>commonResult = new CommonResult<>();
+    public CommonResult<String> checkOut(@RequestParam("roomId") Integer roomId, @RequestParam("realPrice") Double realPrice) {
+        CommonResult<String> commonResult = new CommonResult<>();
 
-        QueryWrapper<Order> orderQueryWrapper=new QueryWrapper();
-        orderQueryWrapper.eq("room_id",roomId);
-        orderQueryWrapper.eq("flag",1);
-        Order order=orderService.getOne(orderQueryWrapper);
+        QueryWrapper<Order> orderQueryWrapper = new QueryWrapper();
+        orderQueryWrapper.eq("room_id", roomId);
+        orderQueryWrapper.eq("flag", 1);
+        Order order = orderService.getOne(orderQueryWrapper);
         order.setFlag(3);
-        order.setRealPrice(realPrice);
+        if (realPrice != null)
+            order.setRealPrice(realPrice);
         order.setLeaveTime(new Date());
 
-        orderQueryWrapper.eq("id",order.getId());
-        orderService.update(order,orderQueryWrapper);
+        orderQueryWrapper.eq("id", order.getId());
+        orderService.update(order, orderQueryWrapper);
 
-        QueryWrapper<Room> roomQueryWrapper=new QueryWrapper<>();
-        roomQueryWrapper.eq("id",roomId);
-        Room room=roomService.getOne(roomQueryWrapper);
+        QueryWrapper<Room> roomQueryWrapper = new QueryWrapper<>();
+        roomQueryWrapper.eq("id", roomId);
+        Room room = roomService.getOne(roomQueryWrapper);
         room.setState(0);
-        roomService.update(room,roomQueryWrapper);
+        roomService.update(room, roomQueryWrapper);
 
-        if(order!=null&&room!=null){
+        if (order != null && room != null) {
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
             commonResult.setData("退房成功！");
-        }else{
+        } else {
             commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
             commonResult.setData("数据库t_order,room表修改错误！");

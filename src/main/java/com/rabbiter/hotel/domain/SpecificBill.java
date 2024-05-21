@@ -67,7 +67,7 @@ public class SpecificBill {
     public SpecificBill() {
     }
 
-    public SpecificBill(Integer id, Integer userId, Date requestTime,Date startTime, Integer roomId, Date endTime, Integer windSpeed,
+    public SpecificBill(Integer id, Integer userId, Date requestTime,Date startTime,Integer roomId, Date endTime, Integer windSpeed,
                         Integer temperature, Integer duration, Integer reason, Integer extraFee,Float currentFee,Float feeRate) {
         this.id = id;
         this.userId = userId;
