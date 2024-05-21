@@ -8,6 +8,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 /**
  * @author Ruiqi Yu
  * @date: 2024/5/15
@@ -18,6 +20,7 @@ public class PowerManager {
 
     public static void powerOn(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
         airConditionerStatusDTO.setPowerOn(true);
+        airConditionerStatusDTO.setPowerOnTime(new Date());
         String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -1);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
         logger.info("/power on: " + airConditionerStatusDTO.getRoomID());
