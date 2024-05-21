@@ -18,10 +18,6 @@ public class Admin {
 
     @TableId(value = "id")
     private Integer id;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @TableField(value = "create_time")
-    private Date createTime = new Date();
     @TableField(value = "email")
     private String email;
     @TableField(value = "admin_name")
@@ -31,16 +27,19 @@ public class Admin {
     @TableField(value = "phone")
     private String phone;
 
+    @TableField(value = "type")
+    private Integer type;
+
     public Admin() {
     }
 
-    public Admin(Integer id, Date createTime, String email, String admin_name, String password, String phone) {
+    public Admin(Integer id, String email, String admin_name, String password, String phone,Integer type) {
         this.id = id;
-        this.createTime = createTime;
         this.email = email;
         this.admin_name = admin_name;
         this.password = password;
         this.phone = phone;
+        this.type=type;
     }
 
     public Integer getId() {
@@ -49,14 +48,6 @@ public class Admin {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
     }
 
     public String getEmail() {
@@ -91,15 +82,23 @@ public class Admin {
         this.phone = phone;
     }
 
+    public void setType(Integer type){
+        this.type=type;
+    }
+
+    public Integer getType(){
+        return type;
+    }
+
     @Override
     public String toString() {
         return "Admin{" +
                 "id=" + id +
-                ", createTime=" + createTime +
                 ", email='" + email + '\'' +
                 ", admin_name='" + admin_name + '\'' +
                 ", password='" + password + '\'' +
                 ", phone='" + phone + '\'' +
+                ", type='" + type + '\'' +
                 '}';
     }
 }

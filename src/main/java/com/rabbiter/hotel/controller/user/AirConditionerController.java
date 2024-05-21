@@ -88,13 +88,12 @@ public class AirConditionerController {
     @PostMapping(value = "/turnOn")
     public CommonResult<String> turnOn(@RequestBody AirConditionerStatusDTO airConditionerStatusDTO) {
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
+        if(user!=null)
         airConditionerStatusDTO.setUserID(user.getId());
         CommonResult<String> commonResult = new CommonResult<>();
-        queueController.enQueue(airConditionerStatusDTO);
         if (queueController.enQueue(airConditionerStatusDTO) == QueueController.SERVICE) {
             commonResult.setData("加入服务队列");
         } else {
-
             commonResult.setData("加入等待队列");
         }
         commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
@@ -148,7 +147,7 @@ public class AirConditionerController {
 
 
     @PostMapping(value = "turnOff")
-    public CommonResult<String> turnOff(@RequestParam("roomId") Integer roomID) throws JSONException {
+    public CommonResult<String> turnOff(@RequestParam("roomId") Integer roomID)  {
         CommonResult<String> commonResult = new CommonResult<>();
         AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
         if (airConditionerStatusDTO == null) {

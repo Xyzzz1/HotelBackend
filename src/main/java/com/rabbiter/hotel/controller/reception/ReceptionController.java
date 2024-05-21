@@ -17,9 +17,9 @@ import javax.annotation.Resource;
  * @date：2022/01/01 19:31
  * Description：
  */
-@RestController("adminAdminController")
+@RestController("receptionController")
 @RequestMapping("/reception")
-public class AdminController {
+public class ReceptionController {
 
     @Resource
     private AdminService adminService;
@@ -29,14 +29,12 @@ public class AdminController {
         CommonResult<Admin> commonResult = new CommonResult<>();
         QueryWrapper queryWrapper = new QueryWrapper();
 
-        queryWrapper.eq("admin_name", adminLoginDTO.getUserName());
+        queryWrapper.eq("email", adminLoginDTO.getEmail());
         String md5Password = SecureUtil.md5(adminLoginDTO.getPassword());
         queryWrapper.eq("password", md5Password);
         Admin admin = adminService.getOne(queryWrapper);
 
         if (null != admin) {
-            admin.setAdmin_name(adminLoginDTO.getUserName());
-            WebUtils.getSession().setAttribute("loginAdmin", admin);
 
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());

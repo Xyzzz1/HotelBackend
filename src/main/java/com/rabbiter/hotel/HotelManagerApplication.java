@@ -12,6 +12,7 @@ import java.util.TimeZone;
 @EnableScheduling
 public class HotelManagerApplication {
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         SpringApplication.run(HotelManagerApplication.class, args);
     }
 }

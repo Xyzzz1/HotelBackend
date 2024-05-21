@@ -120,10 +120,13 @@ public class RoomController {
     public CommonResult<String> bookRoom(@RequestBody BookDTO bookDTO) {
         CommonResult<String> commonResult = new CommonResult<>();
 
-        User user = (User) WebUtils.getSession().getAttribute("loginUser");
+
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq("phone",bookDTO.getPhone());
+        User user=userService.getBaseMapper().selectOne(queryWrapper);
+
         if (user == null) {
-            System.out.println("登录信息过期");
-            commonResult.setData("登录信息过期");
+            commonResult.setData("不存在该用户!");
             commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
             return commonResult;
@@ -137,6 +140,7 @@ public class RoomController {
         Order order = new Order();
         BeanUtils.copyProperties(bookDTO, order);
         order.setUserId(user.getId());
+        order.setFlag(1); //已经办理入住
 
 
         int days = (int) Math.ceil((bookDTO.getLeaveTime().getTime() - bookDTO.getInTime().getTime()) / (60 * 60 * 24 * 1000 * 1.0));

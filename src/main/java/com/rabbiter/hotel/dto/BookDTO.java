@@ -12,6 +12,7 @@ import java.util.Date;
  */
 public class BookDTO {
 
+    private String phone;
     private Integer roomId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
@@ -27,12 +28,21 @@ public class BookDTO {
     public BookDTO() {
     }
 
-    public BookDTO(Integer roomId, Date inTime, Date leaveTime, Integer realPeople, Integer fapiao) {
+    public BookDTO(String phone, Integer roomId, Date inTime, Date leaveTime, Integer realPeople, Integer fapiao) {
+        this.phone = phone;
         this.roomId = roomId;
         this.inTime = inTime;
         this.leaveTime = leaveTime;
         this.realPeople = realPeople;
         this.fapiao = fapiao;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPhone() {
+        return this.phone;
     }
 
     public Integer getRoomId() {
@@ -78,6 +88,7 @@ public class BookDTO {
     @Override
     public String toString() {
         return "BookDTO{" +
+                "phone=" + phone +
                 "roomId=" + roomId +
                 ", inTime=" + inTime +
                 ", leaveTime=" + leaveTime +

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
 import com.rabbiter.hotel.domain.Order;
+import com.rabbiter.hotel.domain.Room;
 import com.rabbiter.hotel.domain.SpecificBill;
 import com.rabbiter.hotel.domain.User;
 import com.rabbiter.hotel.service.OrderService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -108,5 +110,40 @@ public class OrderController {
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         commonResult.setData(bilList);
         return commonResult;
+    }
+
+    @PostMapping("/checkOut")
+    public CommonResult<String> checkOut(@RequestParam("roomId") Integer roomId,@RequestParam("realPrice") Double realPrice){
+        CommonResult<String>commonResult = new CommonResult<>();
+
+        QueryWrapper<Order> orderQueryWrapper=new QueryWrapper();
+        orderQueryWrapper.eq("room_id",roomId);
+        orderQueryWrapper.eq("flag",1);
+        Order order=orderService.getOne(orderQueryWrapper);
+        order.setFlag(3);
+        order.setRealPrice(realPrice);
+        order.setLeaveTime(new Date());
+
+        orderQueryWrapper.eq("id",order.getId());
+        orderService.update(order,orderQueryWrapper);
+
+        QueryWrapper<Room> roomQueryWrapper=new QueryWrapper<>();
+        roomQueryWrapper.eq("id",roomId);
+        Room room=roomService.getOne(roomQueryWrapper);
+        room.setState(0);
+        roomService.update(room,roomQueryWrapper);
+
+        if(order!=null&&room!=null){
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+            commonResult.setData("退房成功！");
+        }else{
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+            commonResult.setData("数据库t_order,room表修改错误！");
+        }
+
+        return commonResult;
+
     }
 }

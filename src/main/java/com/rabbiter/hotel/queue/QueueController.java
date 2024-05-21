@@ -79,7 +79,6 @@ public class QueueController {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         if (QueueDTO.waitQueue.contains(airConditionerStatusDTO)) {
             removeFromWait(airConditionerStatusDTO);
             return WAIT;

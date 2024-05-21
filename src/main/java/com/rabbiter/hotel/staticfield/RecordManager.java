@@ -6,15 +6,17 @@ import com.rabbiter.hotel.domain.SpecificBill;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.service.SpecificBillService;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 
 public class RecordManager {
 
-    private SpecificBillService specificBillService;
+    @Resource
+    private static SpecificBillService specificBillService;
 
-    public RecordManager(SpecificBillService specificBillService) {
-        this.specificBillService = specificBillService;
+    public RecordManager() {
+
     }
     /**
      * 加入服务队列开始服务时调用
@@ -23,7 +25,7 @@ public class RecordManager {
      * @param dto
      */
 
-    public  void powerOn(AirConditionerStatusDTO dto){
+    public  static void powerOn(AirConditionerStatusDTO dto){
         Date currentTime = new Date(); // 当前时间
         int preid;
         QueryWrapper<SpecificBill> queryWrapper_id = new QueryWrapper<>();
@@ -53,7 +55,7 @@ public class RecordManager {
      * @param dto
      * @param reason
      */
-    public  void powerOff(AirConditionerStatusDTO dto, int reason){
+    public  static void powerOff(AirConditionerStatusDTO dto, int reason){
         Date currentTime = new Date(); // 当前时间
 
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
@@ -83,7 +85,7 @@ public class RecordManager {
      *
      * @param dto
      */
-    public  void windAdjust(AirConditionerStatusDTO dto){
+    public  static void windAdjust(AirConditionerStatusDTO dto){
         Date currentTime = new Date(); // 当前时间
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", dto.getUserID());
@@ -132,7 +134,7 @@ public class RecordManager {
      * 找到该用户最近最近的一条记录，更新当前温度
      * @param dto
      */
-    public  void temperAdjust(AirConditionerStatusDTO dto){
+    public  static void temperAdjust(AirConditionerStatusDTO dto){
         Date currentTime = new Date(); // 当前时间
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", dto.getUserID());
@@ -160,7 +162,7 @@ public class RecordManager {
      * 找到该用户最近最近的一条记录，更新duration
      * @param dto
      */
-    public  void DurationAdjust(AirConditionerStatusDTO dto){
+    public static  void DurationAdjust(AirConditionerStatusDTO dto){
         Date currentTime = new Date(); // 当前时间
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", dto.getUserID());
