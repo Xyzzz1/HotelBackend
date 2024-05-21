@@ -78,18 +78,18 @@ public class RecordManager {
     }
 
     /**
-     * 调整风速时调用
      * 找到该用户最近最近的一条记录，若end不为空，说明已经服务完毕，直接返回，否则更新end_time为当前时间，按照当前风速更新current_fee+=计算出的费用
      * 新建一条新记录，request_time，start_time为当前时间，end_time,extra_fee,reason应为null,current_fee为刚刚更新后的费用
      *
      * @param dto
      */
-    public void windAdjust(AirConditionerStatusDTO dto) {
+    public void updateAndAdd(AirConditionerStatusDTO dto){
         Date currentTime = new Date(); // 当前时间
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", dto.getUserID());
         queryWrapper.orderByDesc("id");
         queryWrapper.last("LIMIT 1");
+
         SpecificBill update = specificBillService.getOne(queryWrapper);
         if (update.getEndTime() != null)//服务完毕
             return;
@@ -102,79 +102,19 @@ public class RecordManager {
         updateWrapper.eq("id", update.getId());
         boolean flag1 = specificBillService.update(update, updateWrapper);
         if (flag1) {
-            System.out.println("风速更新成功");
+            System.out.println("更新成功");
         } else {
-            System.out.println("风速更新失败");
+            System.out.println("更新失败");
         }
-
-        queryWrapper.clear();
 
         SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), currentTime, currentTime, dto.getRoomID(),
                 null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), current_fee, 1f);
         boolean flag2 = specificBillService.save(specificBill);
         if (flag2) {
-            System.out.println("风速新建成功");
+            System.out.println("新建成功");
         } else {
-            System.out.println("风速新建失败");
+            System.out.println("新建失败");
         }
-    }
-
-
-    /**
-     * 调整温度时调用
-     * 找到该用户最近最近的一条记录，更新当前温度
-     *
-     * @param dto
-     */
-    public void temperAdjust(AirConditionerStatusDTO dto) {
-        QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", dto.getUserID());
-        queryWrapper.orderByDesc("id");
-        queryWrapper.last("LIMIT 1");
-
-        SpecificBill update = specificBillService.getOne(queryWrapper);
-
-        update.setTemperature(dto.getTargetTemperature());
-
-
-        UpdateWrapper<SpecificBill> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", update.getId());
-        boolean flag1 = specificBillService.update(update, updateWrapper);
-        if (flag1) {
-            System.out.println("温度更新成功");
-        } else {
-            System.out.println("温度更新失败");
-        }
-
-    }
-
-    /**
-     * 调整duration时调用
-     * 找到该用户最近最近的一条记录，更新duration
-     *
-     * @param dto
-     */
-    public void DurationAdjust(AirConditionerStatusDTO dto) {
-        QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", dto.getUserID());
-        queryWrapper.orderByDesc("id");
-        queryWrapper.last("LIMIT 1");
-
-        SpecificBill update = specificBillService.getOne(queryWrapper);
-
-        //更新时间
-        update.setDuration(dto.getTargetDuration());
-
-
-        UpdateWrapper<SpecificBill> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", update.getId());
-        boolean flag1 = specificBillService.update(update, updateWrapper);
-        if (flag1) {
-            System.out.println("duration更新成功");
-        } else {
-            System.out.println("duration更新失败");
-        }
-
 
     }
 

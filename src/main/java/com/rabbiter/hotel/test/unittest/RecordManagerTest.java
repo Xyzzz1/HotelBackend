@@ -198,8 +198,6 @@ public class RecordManagerTest {
     }
 
 
-
-
     @Test
     public void temperAdjustTest() {
         Date currentTime = new Date(); //当前时间
@@ -260,6 +258,51 @@ public class RecordManagerTest {
             System.out.println("duration更新失败");
         }
 
+
+    }
+
+
+    @Test
+    public void updateAndAddTest() {
+        Date currentTime = new Date(); //当前时间
+        //进行关机服务,用户2
+        AirConditionerStatusDTO dto = new AirConditionerStatusDTO(202, 2, true, 20, 1, 0, 18, currentTime, 1);
+        updateAndAdd(dto);
+
+    }
+
+    public void updateAndAdd(AirConditionerStatusDTO dto) {
+        Date currentTime = new Date(); // 当前时间
+        QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", dto.getUserID());
+        queryWrapper.orderByDesc("id");
+        queryWrapper.last("LIMIT 1");
+
+        SpecificBill update = specificBillService.getOne(queryWrapper);
+        if (update.getEndTime() != null)//服务完毕
+            return;
+
+        update.setEndTime(currentTime);
+        float current_fee = update.getCurrentFee() + calFee(update);
+        update.setCurrentFee(current_fee);
+
+        UpdateWrapper<SpecificBill> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", update.getId());
+        boolean flag1 = specificBillService.update(update, updateWrapper);
+        if (flag1) {
+            System.out.println("更新成功");
+        } else {
+            System.out.println("更新失败");
+        }
+
+        SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), currentTime, currentTime, dto.getRoomID(),
+                null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), current_fee, 1f);
+        boolean flag2 = specificBillService.save(specificBill);
+        if (flag2) {
+            System.out.println("新建成功");
+        } else {
+            System.out.println("新建失败");
+        }
 
     }
 
