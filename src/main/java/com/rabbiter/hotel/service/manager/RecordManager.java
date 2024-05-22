@@ -40,8 +40,6 @@ public class RecordManager {
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper); //最近的一条记录
 
-        System.out.println(pre_specificBill.toString());
-
         boolean success=false;
         if(pre_specificBill==null) { //此前没有详单记录
             SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomID(),
@@ -52,8 +50,6 @@ public class RecordManager {
             orderQueryWrapper.eq("user_id", dto.getUserID());
             orderQueryWrapper.eq("flag", 1);
             Order currentOrder = orderService.getOne(orderQueryWrapper);
-
-            System.out.println(currentOrder.toString());
 
             Date currentOrderDate=currentOrder.getCreateTime();
             if(pre_specificBill.getStartTime().getTime()<currentOrderDate.getTime()){ //对应记录是上一次的订单

@@ -35,6 +35,9 @@ public class OrderController {
     @Resource
     private TypeService typeService;
 
+    @Resource
+    private  BillService billService;
+
     @GetMapping("/listOrders")
     public CommonResult<List<Order>> listOrders(@RequestParam("orderFlags") List<Integer> flags) {
         CommonResult<List<Order>> commonResult = new CommonResult<>();
@@ -112,7 +115,7 @@ public class OrderController {
     }
 
     @PostMapping("/checkOut")
-    public CommonResult<String> checkOut(@RequestParam("roomId") Integer roomId, @RequestParam("realPrice") Double realPrice) {
+    public CommonResult<String> checkOut(@RequestParam("roomId") Integer roomId) {
         CommonResult<String> commonResult = new CommonResult<>();
 
         QueryWrapper<Order> orderQueryWrapper = new QueryWrapper();
@@ -120,9 +123,6 @@ public class OrderController {
         orderQueryWrapper.eq("flag", 1);
         Order order = orderService.getOne(orderQueryWrapper);
         order.setFlag(3);
-        if (realPrice != null)
-            order.setRealPrice(realPrice);
-        order.setLeaveTime(new Date());
 
         orderQueryWrapper.eq("id", order.getId());
         orderService.update(order, orderQueryWrapper);
@@ -132,6 +132,32 @@ public class OrderController {
         Room room = roomService.getOne(roomQueryWrapper);
         room.setState(0);
         roomService.update(room, roomQueryWrapper);
+
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("id", order.getUserId());
+        User user = userService.getOne(userQueryWrapper);
+
+        QueryWrapper<SpecificBill> specificBillQueryWrapper = new QueryWrapper<>();
+        specificBillQueryWrapper.eq("user_id", order.getUserId());
+        specificBillQueryWrapper.eq("user_id", order.getUserId());
+        specificBillQueryWrapper.orderByDesc("id");
+        specificBillQueryWrapper.last("LIMIT 1");
+        SpecificBill pre_specificBill = specificBillService.getOne(specificBillQueryWrapper); //最近的一条记录
+
+        if(pre_specificBill==null) { //此前没有详单记录
+            Bill bill = new Bill(null, order.getUserId(), user.getUserName(), (double) order.getRealPrice(), new Date());
+            billService.save(bill);
+        }else{
+            Date currentOrderDate=order.getCreateTime();
+            if(pre_specificBill.getStartTime().getTime()<currentOrderDate.getTime()){ //对应记录是上一次的订单
+                Bill bill = new Bill(null, order.getUserId(), user.getUserName(), (double) order.getRealPrice(), new Date());
+                billService.save(bill);
+            }else{
+                Bill bill = new Bill(null, order.getUserId(), user.getUserName(), (double) (pre_specificBill.getCurrentFee()+order.getRealPrice()), new Date());
+                billService.save(bill);
+            }
+
+        }
 
         if (order != null && room != null) {
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
@@ -194,10 +220,18 @@ public class OrderController {
         specificBillQueryWrapper.orderByDesc("id");
         specificBillQueryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(specificBillQueryWrapper); //最近的一条记录
-        airConditionerFee.put("totalPrice", pre_specificBill.getCurrentFee());
+
+        Float conditionerFee=0f;
+        if(pre_specificBill!=null) {
+            Date currentOrderDate=currentOrder.getCreateTime();
+            if(pre_specificBill.getStartTime().getTime()>currentOrderDate.getTime()){ //对应记录是上一次的订单
+                conditionerFee=pre_specificBill.getCurrentFee();
+            }
+        }
+        airConditionerFee.put("totalPrice", conditionerFee);
 
         result.put("airConditionerFee", airConditionerFee);
-        result.put("totalFee", currentOrder.getRealPrice() + pre_specificBill.getCurrentFee());
+        result.put("totalFee", currentOrder.getRealPrice() + conditionerFee);
 
         commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
