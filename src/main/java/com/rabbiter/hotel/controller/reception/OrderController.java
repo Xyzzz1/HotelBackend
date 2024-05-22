@@ -35,9 +35,6 @@ public class OrderController {
     @Resource
     private TypeService typeService;
 
-    @Resource
-    private  BillService billService;
-
     @GetMapping("/listOrders")
     public CommonResult<List<Order>> listOrders(@RequestParam("orderFlags") List<Integer> flags) {
         CommonResult<List<Order>> commonResult = new CommonResult<>();
@@ -133,31 +130,6 @@ public class OrderController {
         room.setState(0);
         roomService.update(room, roomQueryWrapper);
 
-        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.eq("id", order.getUserId());
-        User user = userService.getOne(userQueryWrapper);
-
-        QueryWrapper<SpecificBill> specificBillQueryWrapper = new QueryWrapper<>();
-        specificBillQueryWrapper.eq("user_id", order.getUserId());
-        specificBillQueryWrapper.eq("user_id", order.getUserId());
-        specificBillQueryWrapper.orderByDesc("id");
-        specificBillQueryWrapper.last("LIMIT 1");
-        SpecificBill pre_specificBill = specificBillService.getOne(specificBillQueryWrapper); //最近的一条记录
-
-        if(pre_specificBill==null) { //此前没有详单记录
-            Bill bill = new Bill(null, order.getUserId(), user.getUserName(), (double) order.getRealPrice(), new Date());
-            billService.save(bill);
-        }else{
-            Date currentOrderDate=order.getCreateTime();
-            if(pre_specificBill.getStartTime().getTime()<currentOrderDate.getTime()){ //对应记录是上一次的订单
-                Bill bill = new Bill(null, order.getUserId(), user.getUserName(), (double) order.getRealPrice(), new Date());
-                billService.save(bill);
-            }else{
-                Bill bill = new Bill(null, order.getUserId(), user.getUserName(), (double) (pre_specificBill.getCurrentFee()+order.getRealPrice()), new Date());
-                billService.save(bill);
-            }
-
-        }
 
         if (order != null && room != null) {
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
@@ -252,4 +224,7 @@ public class OrderController {
 
         return roundedDays;
     }
+
+
+
 }
