@@ -15,7 +15,7 @@ public class ReturnBillDTO {
     private Integer id;
     private Integer user_id;
     private String user_name;
-    private Integer fee; //总的费用
+    private double fee; //总的费用
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
@@ -24,7 +24,7 @@ public class ReturnBillDTO {
     public ReturnBillDTO() {
     }
 
-    public ReturnBillDTO(Integer id, Integer user_id, String user_name, Integer fee, Date create_time) {
+    public ReturnBillDTO(Integer id, Integer user_id, String user_name, double fee, Date create_time) {
         this.id = id;
         this.user_id = user_id;
         this.user_name = user_name;
@@ -56,11 +56,11 @@ public class ReturnBillDTO {
         this.user_name = user_name;
     }
 
-    public Integer getFee() {
+    public double getFee() {
         return fee;
     }
 
-    public void setFee(Integer fee) {
+    public void setFee(double fee) {
         this.fee = fee;
     }
 

@@ -51,7 +51,7 @@ public class MybatisTest {
         Date createTime = dateFormat.parse(dateString);
 
         Date currentTime=new Date(); //当前时间
-        Bill bill = new Bill(1, 123, "test_user", 60, createTime);
+        Bill bill = new Bill(1, 123, "test_user", (double)60, createTime);
         SpecificBill specificBill = new SpecificBill(1, 123, createTime, currentTime, 111,
                 null, 2, 25, 120, null, 50, 0f, 1f);
 

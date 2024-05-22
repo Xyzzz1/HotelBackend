@@ -36,7 +36,7 @@ public class specialBillServiceTest {
         String dateString = "2024-05-02 15:30";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date createTime = dateFormat.parse(dateString);
-        Bill bill = new Bill(1, 123, "test_user", 60, createTime);
+        Bill bill = new Bill(1, 123, "test_user", (double)60, createTime);
         String dateString2 = "2024-05-02 19:30";
         Date shutDownTime = dateFormat.parse(dateString2);
         SpecificBill specificBill = new SpecificBill(2, 123, createTime,createTime, 111,

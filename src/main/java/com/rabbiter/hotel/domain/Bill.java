@@ -24,7 +24,7 @@ public class Bill {
     @TableField(value = "user_name")
     private String userName;
     @TableField(value = "fee")
-    private Integer fee;
+    private Double fee;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @TableField(value = "create_time")
@@ -33,7 +33,7 @@ public class Bill {
     public Bill() {
     }
 
-    public Bill(Integer id, Integer user_id, String user_name, Integer fee, Date create_time) {
+    public Bill(Integer id, Integer user_id, String user_name, Double fee, Date create_time) {
         this.id = id;
         this.userID = user_id;
         this.userName = user_name;
@@ -66,11 +66,11 @@ public class Bill {
         this.userName = user_name;
     }
 
-    public Integer getFee() {
+    public Double getFee() {
         return fee;
     }
 
-    public void setFee(Integer fee) {
+    public void setFee(Double fee) {
         this.fee = fee;
     }
 

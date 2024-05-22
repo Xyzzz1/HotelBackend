@@ -101,7 +101,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         int acCost = specificBills.stream().mapToInt(bill -> calculateACCost(bill)).sum();
 
         // 总费用 = 房费 + 空调费用
-        int totalCost = latestBill.getFee() + acCost;
+        int totalCost = (int)(latestBill.getFee() + acCost);
 
         return new ReturnBillDTO(latestBill.getId(), userID, latestBill.getUser_name(), totalCost, latestBill.getCreate_time());
     }
