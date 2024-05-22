@@ -19,6 +19,9 @@ public class Configuration {
     public static double temperatureChangeRate;
     public static int timeChangeRate;
     public static int queueCapacity;
+    public static String jdbcURL;
+    public static String jdbcUserName;
+    public static String jdbcPassword;
 
 
     static {
@@ -28,7 +31,7 @@ public class Configuration {
 
     public static void loadProperties(){
         Properties properties = new Properties();
-        String filePath = Paths.get("").toAbsolutePath().toString()+"/.idea/config/config.properties";
+        String filePath = Paths.get("").toAbsolutePath().toString()+"/src/main/resources/config.properties";
         //System.out.println(filePath);
         try (InputStream input = new BufferedInputStream(new FileInputStream(filePath))) {
             if (input == null) {
@@ -45,6 +48,9 @@ public class Configuration {
             temperatureChangeRate = Double.parseDouble(properties.getProperty("temperature.change.rate"));
             timeChangeRate = Integer.parseInt(properties.getProperty("time.change.rate"));
             queueCapacity=Integer.parseInt(properties.getProperty("queue.capacity"));
+            jdbcURL=properties.getProperty("jdbc.url");
+            jdbcUserName=properties.getProperty("jdbc.username");
+            jdbcPassword=properties.getProperty("jdbc.password");
 
         } catch (IOException ex) {
             ex.printStackTrace();
