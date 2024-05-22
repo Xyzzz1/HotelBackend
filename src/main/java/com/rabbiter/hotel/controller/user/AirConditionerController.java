@@ -8,28 +8,27 @@ import com.rabbiter.hotel.domain.Order;
 import com.rabbiter.hotel.domain.User;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
-import com.rabbiter.hotel.queue.QueueController;
-import com.rabbiter.hotel.staticfield.PowerManager;
+import com.rabbiter.hotel.service.manager.QueueManager;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.sse.SseEmitterServer;
-import com.rabbiter.hotel.staticfield.RecordManager;
+import com.rabbiter.hotel.service.manager.RecordManager;
 import com.rabbiter.hotel.util.WebUtils;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.json.JSONObject;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/user/conditioner")
 public class AirConditionerController {
     private final Logger logger = LoggerFactory.getLogger(SseEmitterServer.class);
-    private QueueController queueController = new QueueController();
+    @Resource
+    private QueueManager queueManager;
+
+    @Resource
+    private  RecordManager recordManager;
 
     @Resource
     private OrderService orderService;
@@ -41,17 +40,10 @@ public class AirConditionerController {
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("user_id", user.getId());
-        Date currentDate = new Date();
-        Integer roomID = null;
-        List<Order> orders = orderService.getBaseMapper().selectList(queryWrapper);
-        for (Order order : orders) {
-            if (currentDate.before(order.getLeaveTime()) && currentDate.after(order.getInTime())) {
-                roomID = order.getRoomId();
-                break;
-            }
-        }
-        if (roomID != null) {
-            commonResult.setData(roomID);
+        queryWrapper.eq("flag", 1);
+        Order orders = orderService.getBaseMapper().selectOne(queryWrapper);
+        if (orders != null) {
+            commonResult.setData(orders.getRoomId());
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         } else {
@@ -89,11 +81,12 @@ public class AirConditionerController {
 
     @PostMapping(value = "/turnOn")
     public CommonResult<String> turnOn(@RequestBody AirConditionerStatusDTO airConditionerStatusDTO) {
+        System.out.println(airConditionerStatusDTO.toString());
         User user = (User) WebUtils.getSession().getAttribute("loginUser");
-        if(user!=null)
-        airConditionerStatusDTO.setUserID(user.getId());
+        if (user != null)
+            airConditionerStatusDTO.setUserID(user.getId());
         CommonResult<String> commonResult = new CommonResult<>();
-        if (queueController.enQueue(airConditionerStatusDTO) == QueueController.SERVICE) {
+        if (queueManager.enQueue(airConditionerStatusDTO) == QueueManager.SERVICE) {
             commonResult.setData("加入服务队列");
         } else {
             commonResult.setData("加入等待队列");
@@ -119,6 +112,7 @@ public class AirConditionerController {
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
         } else {
             airConditionerStatusDTO.setTargetTemperature(temp);
+            recordManager.updateAndAdd(airConditionerStatusDTO);
             commonResult.setData("roomID" + roomID + ": 温度修改成功");
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
@@ -140,6 +134,7 @@ public class AirConditionerController {
             commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
         } else {
             airConditionerStatusDTO.setWindSpeed(windSpeed);
+            recordManager.updateAndAdd(airConditionerStatusDTO);
             commonResult.setData("roomID" + roomID + ": 风速修改成功");
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
@@ -149,7 +144,7 @@ public class AirConditionerController {
 
 
     @PostMapping(value = "turnOff")
-    public CommonResult<String> turnOff(@RequestParam("roomId") Integer roomID)  {
+    public CommonResult<String> turnOff(@RequestParam("roomId") Integer roomID) {
         CommonResult<String> commonResult = new CommonResult<>();
         AirConditionerStatusDTO airConditionerStatusDTO = findServer(0, roomID);
         if (airConditionerStatusDTO == null) {
@@ -162,7 +157,7 @@ public class AirConditionerController {
             }
         }
 
-        if(queueController.deQueue(airConditionerStatusDTO,2)==QueueController.WAIT)
+        if (queueManager.deQueue(airConditionerStatusDTO, 2) == QueueManager.WAIT)
             commonResult.setData("已从等待队列中移除。");
         else
             commonResult.setData("已从服务队列中移除。");
@@ -195,7 +190,57 @@ public class AirConditionerController {
         return null;
     }
 
+    @PostMapping(value = "/adjustTargetDuration")
+    public CommonResult<String> adjustTargetDuration(@RequestParam("targetDuration") Integer targetDuration, @RequestParam("roomId") Integer roomId) {
+        CommonResult<String> commonResult = new CommonResult<>();
 
+        if (queueManager.updateDuration(roomId, targetDuration)) {
+            commonResult.setData("调整运行时间成功！");
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        } else {
+            commonResult.setData("调整失败！空调未开启服务！");
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+        }
+
+        return commonResult;
+
+    }
+
+    @PostMapping(value = "/adjustMode")
+    public CommonResult<String> adjustMode(@RequestParam("roomId") Integer roomId, @RequestParam("mode") Integer mode) {
+        boolean isFind = false;
+        for (AirConditionerStatusDTO updateDTO : QueueDTO.waitQueue) {
+            if (updateDTO.getRoomID() == roomId) {
+                updateDTO.setMode(mode);
+                recordManager.updateAndAdd(updateDTO);
+                isFind = true;
+            }
+        }
+        if (!isFind)
+            for (AirConditionerStatusDTO updateDTO : QueueDTO.serviceQueue) {
+                if (updateDTO.getRoomID() == roomId) {
+                    updateDTO.setMode(mode);
+                    recordManager.updateAndAdd(updateDTO);
+                    isFind = true;
+                }
+            }
+
+        CommonResult<String> commonResult = new CommonResult<>();
+
+        if (isFind) {
+            commonResult.setData("调整模式成功！");
+            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        } else {
+            commonResult.setData("调整失败！空调未开启服务！");
+            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
+            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+        }
+
+        return commonResult;
+    }
 
 
 }

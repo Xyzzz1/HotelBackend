@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.test.unittest;
 
-import com.rabbiter.hotel.queue.TimerManager;
+import com.rabbiter.hotel.component.TimerManager;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import org.junit.Test;
 

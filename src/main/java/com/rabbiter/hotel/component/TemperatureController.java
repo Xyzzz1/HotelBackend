@@ -34,7 +34,7 @@ public class TemperatureController {
     private RoomTempService roomTempService;
 
     @Resource
-    private  RoomService roomService;
+    private RoomService roomService;
     private static final Logger logger = LoggerFactory.getLogger(SseEmitterServer.class);
 
     private Map<Integer, Double> initIndoorTemp;
@@ -44,46 +44,45 @@ public class TemperatureController {
     @Scheduled(cron = "*/10 * * * * ?")
     public void adjustTemperature() throws JSONException {
         //初始化
-        if (initIndoorTemp == null) {
-            initIndoorTemp = new HashMap<>();
-            indoorTemp = new HashMap<>();
-            QueryWrapper<RoomTemp> tempQueryWrapper = new QueryWrapper<>();
-            List<RoomTemp> roomTemperatureList = roomTempService.getBaseMapper().selectList(tempQueryWrapper);
-            for (RoomTemp roomTemp : roomTemperatureList) {
-                initIndoorTemp.put(roomTemp.getRoomID(), roomTemp.getInitTemp());
-                indoorTemp.put(roomTemp.getRoomID(), roomTemp.getInitTemp());
-            }
-
-            QueryWrapper<Room> roomQueryWrapper = new QueryWrapper();
-            roomQueryWrapper.eq("state",1).select("id");
-            List<Object> roomNumberList = roomService.getBaseMapper().selectObjs(roomQueryWrapper);
-            roomList=new ArrayList<>();
-            for(Object number:roomNumberList)
-                roomList.add(Integer.valueOf(number.toString()));
+        initIndoorTemp = new HashMap<>();
+        indoorTemp = new HashMap<>();
+        QueryWrapper<RoomTemp> tempQueryWrapper = new QueryWrapper<>();
+        List<RoomTemp> roomTemperatureList = roomTempService.getBaseMapper().selectList(tempQueryWrapper);
+        for (RoomTemp roomTemp : roomTemperatureList) {
+            initIndoorTemp.put(roomTemp.getRoomID(), roomTemp.getInitTemp());
+            indoorTemp.put(roomTemp.getRoomID(), roomTemp.getInitTemp());
         }
 
-        List<Integer> serviceRoom=new ArrayList<>();
+        QueryWrapper<Room> roomQueryWrapper = new QueryWrapper();
+        roomQueryWrapper.eq("state", 1).select("id");
+        List<Object> roomNumberList = roomService.getBaseMapper().selectObjs(roomQueryWrapper);
+        roomList = new ArrayList<>();
+        for (Object number : roomNumberList)
+            roomList.add(Integer.valueOf(number.toString()));
+
+
+        List<Integer> serviceRoom = new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.serviceQueue) {
             serviceRoom.add(airConditionerStatusDTO.getRoomID());
         }
 
-        List<Integer> waitRoom=new ArrayList<>();
+        List<Integer> waitRoom = new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.waitQueue) {
             waitRoom.add(airConditionerStatusDTO.getRoomID());
         }
 
-        List<Integer> shutdownRoom =new ArrayList<>();
-        for(Integer roomID:roomList){
-            if(!serviceRoom.contains(roomID)&&!waitRoom.contains(roomID))
+        List<Integer> shutdownRoom = new ArrayList<>();
+        for (Integer roomID : roomList) {
+            if (!serviceRoom.contains(roomID) && !waitRoom.contains(roomID))
                 shutdownRoom.add(roomID);
         }
 
-        logger.info("init indoor temperature: "+indoorTemp);
-        logger.info("current indoor temperature: "+indoorTemp);
-        logger.info("all using rooms: "+roomList);
-        logger.info("service rooms: "+serviceRoom);
-        logger.info("waiting rooms: "+waitRoom);
-        logger.info("shutdown rooms: "+shutdownRoom);
+        logger.info("init indoor temperature: " + indoorTemp);
+        logger.info("current indoor temperature: " + indoorTemp);
+        logger.info("all using rooms: " + roomList);
+        logger.info("service rooms: " + serviceRoom);
+        logger.info("waiting rooms: " + waitRoom);
+        logger.info("shutdown rooms: " + shutdownRoom);
         //0制热，1制冷
 
         //空调制冷或制热
@@ -100,7 +99,7 @@ public class TemperatureController {
                 //发送sse通知前端
                 String message = createSSEMessage(indoorTemp.get(roomID));
                 SseEmitterServer.sendMessage(Integer.toString(roomID), message);
-                logger.info("/indoor temperature change: roomID"+roomID+", " + message);
+                logger.info("/indoor temperature change: roomID" + roomID + ", " + message);
 
                 if (indoorTemp.get(roomID).doubleValue() == airConditionerStatusDTO.getTargetTemperature()) {//到达目标温度
                     //关机
@@ -114,7 +113,7 @@ public class TemperatureController {
                 warmUp(roomID);
             }
         }
-        for(Integer roomID:shutdownRoom){
+        for (Integer roomID : shutdownRoom) {
             if (indoorTemp.containsKey(roomID)) {
                 warmUp(roomID);
             }
@@ -132,7 +131,7 @@ public class TemperatureController {
         //发送sse通知前端
         String message = createSSEMessage(indoorTemp.get(roomID));
         SseEmitterServer.sendMessage(Integer.toString(roomID), message);
-        logger.info("/indoor temperature warmup: roomID"+roomID+", " + message);
+        logger.info("/indoor temperature warmup: roomID" + roomID + ", " + message);
     }
 
     private String createSSEMessage(double temp) throws JSONException {

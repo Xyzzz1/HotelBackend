@@ -1,4 +1,4 @@
-package com.rabbiter.hotel.staticfield;
+package com.rabbiter.hotel.service.manager;
 
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
@@ -7,7 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -15,33 +17,40 @@ import java.util.Date;
  * @date: 2024/5/15
  * Description:
  */
+@Service
 public class PowerManager {
     private static final Logger logger = LoggerFactory.getLogger(SseEmitterServer.class);
 
-    public static void powerOn(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
+    @Resource
+    private RecordManager recordManager;
+
+    public void powerOn(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
         airConditionerStatusDTO.setPowerOn(true);
         airConditionerStatusDTO.setPowerOnTime(new Date());
+        recordManager.powerOn(airConditionerStatusDTO);
         String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -1);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
         logger.info("/power on: " + airConditionerStatusDTO.getRoomID());
     }
 
-    public static void powerOff(AirConditionerStatusDTO airConditionerStatusDTO, int reason) throws JSONException {
+    public void powerOff(AirConditionerStatusDTO airConditionerStatusDTO, int reason) throws JSONException {
         airConditionerStatusDTO.setPowerOn(false);
+        recordManager.powerOff(airConditionerStatusDTO, reason);
         String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), false, reason);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
         logger.info("/power off: " + airConditionerStatusDTO.getRoomID() + ", reason: " + reason);
     }
 
-    public static void waiting(AirConditionerStatusDTO airConditionerStatusDTO) throws  JSONException{
+    public void waiting(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
         airConditionerStatusDTO.setPowerOn(true);
+        recordManager.powerOff(airConditionerStatusDTO, 3);
         String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -3);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
         logger.info("/waiting: " + airConditionerStatusDTO.getRoomID());
     }
 
 
-    private static String createSSEMessage(Integer roomID, boolean isTurnOn, Integer reason) throws JSONException {
+    private String createSSEMessage(Integer roomID, boolean isTurnOn, Integer reason) throws JSONException {
         /*
         reason 枚举类型
         1 计时器到时自动关闭

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rabbiter.hotel.domain.SpecificBill;
 import com.rabbiter.hotel.dto.DateSectionDTO;
 import com.rabbiter.hotel.dto.ReturnSpecificBillDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 

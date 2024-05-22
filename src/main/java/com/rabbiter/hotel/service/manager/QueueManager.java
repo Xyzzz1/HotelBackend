@@ -1,10 +1,13 @@
-package com.rabbiter.hotel.queue;
+package com.rabbiter.hotel.service.manager;
 
 import com.rabbiter.hotel.common.Configuration;
+import com.rabbiter.hotel.component.TimerManager;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
-import com.rabbiter.hotel.staticfield.PowerManager;
 import org.json.JSONException;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,16 +19,20 @@ import java.util.concurrent.TimeUnit;
  * @date: 2024/5/15
  * Description:调度策略，用信号量保证互斥
  */
-public class QueueController {
+@Service
+public class QueueManager {
 
     public static final int WAIT = 1;
     public static final int SERVICE = 2;
-    public static final int POLL = 3;
     private final Semaphore semaphoreWait = new Semaphore(1);
     private final Semaphore semaphoreService = new Semaphore(1);
     private final Semaphore semaphoreTask = new Semaphore(1);
 
     private final TimerManager timerManager = new TimerManager();
+    private RecordManager recordManager=new RecordManager();
+
+    @Resource
+    private PowerManager powerManager;
 
     /**
      * 提出服务请求时的调度策略
@@ -75,7 +82,7 @@ public class QueueController {
      */
     public int deQueue(AirConditionerStatusDTO airConditionerStatusDTO, int reason) {
         try {
-            PowerManager.powerOff(airConditionerStatusDTO, reason);
+            powerManager.powerOff(airConditionerStatusDTO, reason);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -125,7 +132,6 @@ public class QueueController {
     }
 
 
-
     /**
      * 服务时长到期执行的任务：从等待队列选择一个优先级最高，若有多个选择等待时间最长的
      *
@@ -140,7 +146,7 @@ public class QueueController {
                     return;
                 removeFromService(dto);
                 try {
-                    PowerManager.powerOff(dto, 1);
+                    powerManager.powerOff(dto, 1);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -252,7 +258,7 @@ public class QueueController {
             dto.setPowerOnTime(new Date());
             QueueDTO.serviceQueue.add(dto);
             try {
-                PowerManager.powerOn(dto);
+                powerManager.powerOn(dto);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -280,7 +286,7 @@ public class QueueController {
             semaphoreWait.acquire();
             QueueDTO.waitQueue.add(dto);
             try {
-                PowerManager.waiting(dto);
+                powerManager.waiting(dto);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -379,6 +385,35 @@ public class QueueController {
                 lowestWindSpeed = serviceDTO.getWindSpeed();
         }
         return lowestWindSpeed;
+    }
+
+    /**
+     * 更新空调对象的用户设定的时间，需要考虑-1的情况，以及在等待/服务队列
+     *
+     */
+    public boolean updateDuration(Integer roomId, Integer targetDuration) {
+        for (AirConditionerStatusDTO updateDTO : QueueDTO.waitQueue) {
+            if (updateDTO.getRoomID() == roomId) {
+                updateDTO.setTargetDuration(targetDuration);
+                recordManager.updateAndAdd(updateDTO);
+                return true;
+            }
+        }
+
+        for (AirConditionerStatusDTO updateDTO : QueueDTO.serviceQueue) {
+            if (updateDTO.getRoomID() ==roomId) {
+                updateDTO.setTargetDuration(targetDuration);
+                recordManager.updateAndAdd(updateDTO);
+                timerManager.removeObject(updateDTO);
+                long delay = Long.MAX_VALUE;
+                if (targetDuration!= -1) //考虑没有设置定时器的情况
+                    delay = targetDuration / Configuration.timeChangeRate;
+                timerManager.addObjectWithTimer(updateDTO, delay, TimeUnit.SECONDS, taskForService(updateDTO));
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

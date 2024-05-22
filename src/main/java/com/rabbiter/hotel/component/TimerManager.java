@@ -1,4 +1,4 @@
-package com.rabbiter.hotel.queue;
+package com.rabbiter.hotel.component;
 
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 

@@ -57,7 +57,6 @@ public class UserController {
     @PostMapping(value = "/login")
     public CommonResult<String> login(@RequestBody LoginDTO loginDTO) {
         CommonResult<String> commonResult = new CommonResult<>();
-        System.out.println(loginDTO.getEmail()+" "+loginDTO.getPassword());
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("email", loginDTO.getEmail());
         String md5Password = SecureUtil.md5(loginDTO.getPassword());

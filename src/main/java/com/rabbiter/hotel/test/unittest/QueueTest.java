@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.test.unittest;
 
-import com.rabbiter.hotel.queue.QueueController;
+import com.rabbiter.hotel.service.manager.QueueManager;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class QueueTest {
 
-    private QueueController queueController=new QueueController();
+    private QueueManager queueManager =new QueueManager();
 
     @Test
     public void test(){
@@ -32,8 +32,8 @@ public class QueueTest {
         //dtoList.add(airConditionerUser4);
 
         for(AirConditionerStatusDTO dto:dtoList){
-            int result=queueController.enQueue(dto);
-            if(result==QueueController.WAIT){
+            int result= queueManager.enQueue(dto);
+            if(result== QueueManager.WAIT){
                 System.out.println("roomID"+dto.getRoomID()+": into wait queue");
             }else{
                 System.out.println("roomID"+dto.getRoomID()+": into service queue");
