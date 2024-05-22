@@ -3,20 +3,17 @@ package com.rabbiter.hotel.controller.reception;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
-import com.rabbiter.hotel.domain.Order;
-import com.rabbiter.hotel.domain.Room;
-import com.rabbiter.hotel.domain.SpecificBill;
-import com.rabbiter.hotel.domain.User;
-import com.rabbiter.hotel.service.OrderService;
-import com.rabbiter.hotel.service.RoomService;
-import com.rabbiter.hotel.service.SpecificBillService;
-import com.rabbiter.hotel.service.UserService;
+import com.rabbiter.hotel.domain.*;
+import com.rabbiter.hotel.service.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * @author：rabbiter
@@ -35,6 +32,8 @@ public class OrderController {
     private UserService userService;
     @Resource
     private SpecificBillService specificBillService;
+    @Resource
+    private TypeService typeService;
 
     @GetMapping("/listOrders")
     public CommonResult<List<Order>> listOrders(@RequestParam("orderFlags") List<Integer> flags) {
@@ -146,5 +145,77 @@ public class OrderController {
 
         return commonResult;
 
+    }
+
+    @PostMapping("/generateBill")
+    public CommonResult<Map<String, Object>> generateBill(@RequestParam("userId") Integer userId) {
+        CommonResult<Map<String, Object>> commonResult = new CommonResult<>();
+        Map<String, Object> result = new HashMap<>();
+
+        QueryWrapper<Order> orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.eq("user_id", userId);
+        orderQueryWrapper.eq("flag", 1);
+        Order currentOrder = orderService.getOne(orderQueryWrapper);
+        result.put("roomId", currentOrder.getRoomId());
+
+        QueryWrapper<Room> roomQueryWrapper = new QueryWrapper<>();
+        roomQueryWrapper.eq("id", currentOrder.getRoomId());
+        Room room = roomService.getOne(roomQueryWrapper);
+        result.put("roomNumber", room.getNumber());
+
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("id", currentOrder.getUserId());
+        User user = userService.getOne(userQueryWrapper);
+        result.put("userName", user.getUserName());
+
+        Map<String, Object> accommodationFee = new HashMap<>();
+        accommodationFee.put("inTime", currentOrder.getInTime());
+        accommodationFee.put("leaveTime", currentOrder.getLeaveTime());
+        int dayDiff = getDaysDifference(currentOrder.getLeaveTime(), currentOrder.getInTime());
+        accommodationFee.put("dayCount", dayDiff);
+
+        QueryWrapper<Type> typeQueryWrapper = new QueryWrapper<>();
+        typeQueryWrapper.eq("id", room.getType());
+        Type type = typeService.getOne(typeQueryWrapper);
+        accommodationFee.put("unitPrice", type.getPrice());
+
+        accommodationFee.put("totalPrice", currentOrder.getRealPrice());
+
+        result.put("accommodationFee", accommodationFee);
+
+        Map<String, Object> airConditionerFee = new HashMap<>();
+        QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        List<SpecificBill> bilList = specificBillService.getBaseMapper().selectList(queryWrapper);
+        airConditionerFee.put("specificCount", bilList.size());
+
+        QueryWrapper<SpecificBill> specificBillQueryWrapper = new QueryWrapper<>();
+        specificBillQueryWrapper.eq("user_id", userId);
+        specificBillQueryWrapper.orderByDesc("id");
+        specificBillQueryWrapper.last("LIMIT 1");
+        SpecificBill pre_specificBill = specificBillService.getOne(specificBillQueryWrapper); //最近的一条记录
+        airConditionerFee.put("totalPrice", pre_specificBill.getCurrentFee());
+
+        result.put("airConditionerFee", airConditionerFee);
+        result.put("totalFee", currentOrder.getRealPrice() + pre_specificBill.getCurrentFee());
+
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        commonResult.setData(result);
+
+        return commonResult;
+    }
+
+
+    private int getDaysDifference(Date currentDate, Date preDate) {
+        LocalDate localDate1 = currentDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate localDate2 = preDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        long daysBetween = ChronoUnit.DAYS.between(localDate2, localDate1);
+
+        // 向上取整天数差异
+        int roundedDays =  (int)Math.ceil((double) daysBetween);
+
+        return roundedDays;
     }
 }
