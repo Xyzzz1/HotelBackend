@@ -1,9 +1,11 @@
-package com.rabbiter.hotel.util;
+package com.rabbiter.hotel.staticfield;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.*;
+
+import com.rabbiter.hotel.common.Configuration;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 
@@ -35,9 +37,9 @@ import org.apache.poi.xssf.usermodel.*;
 public class createExcel {
     //连接数据库设置
 
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/hotel_manager?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "hjq20030320HJQ";
+    private static final String JDBC_URL = Configuration.jdbcURL;
+    private static final String USERNAME = Configuration.jdbcUserName;
+    private static final String PASSWORD = Configuration.jdbcPassword;
 
     //将所有的详单记录输出到表格中
     public static void writeAllSpecificBill() {
@@ -47,13 +49,13 @@ public class createExcel {
             ResultSet resultSet = statement.executeQuery("SELECT user_id,room_id,request_time,start_time,end_time,duration,wind_speed,current_fee,fee_rate FROM " + tableName + " ORDER BY id,room_id");
 
             //表格位置
-            XSSFWorkbook workbook = getOrCreateWorkbook("src/main/java/com/rabbiter/hotel/util/specificBill.xlsx");
+            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/specificBill.xlsx");
             //该表格下的sheet名字
             XSSFSheet sheet = getOrCreateSheet(workbook, "Specific Bills");
 
             writeResultSetToSheet(resultSet, sheet);
 
-            writeSheetToFile(sheet, workbook, "src/main/java/com/rabbiter/hotel/util/specificBill.xlsx");
+            writeSheetToFile(sheet, workbook, "excel_file/specificBill.xlsx");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
@@ -66,13 +68,13 @@ public class createExcel {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT user_id,room_id,request_time,start_time,end_time,duration,wind_speed,current_fee,fee_rate FROM " + tableName + " WHERE user_id = " + userId + " ORDER BY id,room_id");
 
-            XSSFWorkbook workbook = getOrCreateWorkbook("src/main/java/com/rabbiter/hotel/util/data.xlsx");
+            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/data.xlsx");
 
             XSSFSheet sheet = getOrCreateSheet(workbook, userId + "-Specific Bills");
 
             writeResultSetToSheet(resultSet, sheet);
 
-            writeSheetToFile(sheet, workbook, "src/main/java/com/rabbiter/hotel/util/data.xlsx");
+            writeSheetToFile(sheet, workbook, "excel_file/data.xlsx");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
@@ -86,13 +88,13 @@ public class createExcel {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
-            XSSFWorkbook workbook = getOrCreateWorkbook("src/main/java/com/rabbiter/hotel/util/Bills.xlsx");
+            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/Bills.xlsx");
 
             XSSFSheet sheet = getOrCreateSheetBill(workbook, userId + "Bills");
 
             writeResultSetToSheet(resultSet, sheet);
 
-            writeSheetToFile(sheet, workbook, "src/main/java/com/rabbiter/hotel/util/Bills.xlsx");
+            writeSheetToFile(sheet, workbook, "excel_file/Bills.xlsx");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
