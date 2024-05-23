@@ -20,12 +20,17 @@ public class wirtetoexcelTest {
     @Test
     public void writeUserSpecificBillTest(){
         //输出用户ID为1的详单
-        createExcel.writeUserSpecificBill(15);
+        createExcel.writeUserSpecificBill(2);
     }
 
     @Test
     public void writeByUserBillTest(){
         //输出用户ID为1的账单
-        createExcel.writeByUserBill(15);
+        createExcel.writeByUserBill(1);
     }
+    @Test
+    public void writeByUserConditionerBill(){
+        createExcel.writeByUserConditionerBill(2);
+    }
+
 }
