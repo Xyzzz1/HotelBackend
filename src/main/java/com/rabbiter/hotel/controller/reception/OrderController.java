@@ -5,15 +5,21 @@ import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.StatusCode;
 import com.rabbiter.hotel.domain.*;
 import com.rabbiter.hotel.service.*;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.rabbiter.hotel.staticfield.CreateExcel;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.Date;
+
 
 /**
  * @author：rabbiter
@@ -104,7 +110,6 @@ public class OrderController {
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
         List<SpecificBill> bilList = specificBillService.getBaseMapper().selectList(queryWrapper);
-
         commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
         commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         commonResult.setData(bilList);
@@ -225,6 +230,18 @@ public class OrderController {
         return roundedDays;
     }
 
+    @GetMapping("/specificBillExcel")
+    public ResponseEntity<FileSystemResource> specificBillExcel(@RequestParam("userId") Integer userId){
+        CreateExcel.writeUserSpecificBill(userId);
+        // 指定生成的文件路径
+        File file = new File("excel_file/specificBill.xlsx");
+        FileSystemResource fileSource = new FileSystemResource(file);
 
+        // 返回文件流
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileSource);
+    }
 
 }

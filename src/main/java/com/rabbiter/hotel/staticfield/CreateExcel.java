@@ -34,7 +34,7 @@ import org.apache.poi.xssf.usermodel.*;
  */
 
 
-public class createExcel {
+public class CreateExcel {
     //连接数据库设置
 
     private static final String JDBC_URL = Configuration.jdbcURL;
@@ -68,13 +68,13 @@ public class createExcel {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT user_id,room_id,request_time,start_time,end_time,duration,wind_speed,current_fee,fee_rate FROM " + tableName + " WHERE user_id = " + userId + " ORDER BY id,room_id");
 
-            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/data.xlsx");
+            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/specificBill.xlsx");
 
             XSSFSheet sheet = getOrCreateSheet(workbook, userId + "-Specific Bills");
 
             writeResultSetToSheet(resultSet, sheet);
 
-            writeSheetToFile(sheet, workbook, "excel_file/data.xlsx");
+            writeSheetToFile(sheet, workbook, "excel_file/specificBill.xlsx");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
@@ -88,13 +88,13 @@ public class createExcel {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
-            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/Bills.xlsx");
+            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/bills.xlsx");
 
-            XSSFSheet sheet = getOrCreateSheetBill(workbook, userId + "Bills");
+            XSSFSheet sheet = getOrCreateSheetBill(workbook, userId + "bills");
 
             writeResultSetToSheet(resultSet, sheet);
 
-            writeSheetToFile(sheet, workbook, "excel_file/Bills.xlsx");
+            writeSheetToFile(sheet, workbook, "excel_file/bills.xlsx");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }

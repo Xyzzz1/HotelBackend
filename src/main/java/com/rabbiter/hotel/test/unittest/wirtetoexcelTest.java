@@ -1,6 +1,6 @@
 package com.rabbiter.hotel.test.unittest;
 
-import com.rabbiter.hotel.staticfield.createExcel;
+import com.rabbiter.hotel.staticfield.CreateExcel;
 import org.junit.Test;
 
 /**
@@ -13,19 +13,19 @@ public class wirtetoexcelTest {
     @Test
     public void writeAllSpecificBillTest(){
         //输出数据库中的所有详单
-        createExcel.writeAllSpecificBill();
+        CreateExcel.writeAllSpecificBill();
     }
 
 
     @Test
     public void writeUserSpecificBillTest(){
         //输出用户ID为1的详单
-        createExcel.writeUserSpecificBill(15);
+        CreateExcel.writeUserSpecificBill(15);
     }
 
     @Test
     public void writeByUserBillTest(){
         //输出用户ID为1的账单
-        createExcel.writeByUserBill(15);
+        CreateExcel.writeByUserBill(15);
     }
 }
