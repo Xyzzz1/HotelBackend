@@ -46,10 +46,6 @@ public class ConditionerController {
             returnList.add(airConditionerStatusDTO);
         }
 
-        AirConditionerStatusDTO barrierDTO=new AirConditionerStatusDTO();
-        barrierDTO.setRoomId(-1); //区分等待还是服务的分隔
-        returnList.add(barrierDTO);
-
         List<Integer> waitRoom=new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.waitQueue) {
             waitRoom.add(airConditionerStatusDTO.getRoomId());
