@@ -89,8 +89,10 @@ public class QueueManager {
         } else {
             removeFromService(airConditionerStatusDTO);
             AirConditionerStatusDTO newDTO = selectNew();
-            if (newDTO != null)
+            if (newDTO != null) {
+                removeFromWait(newDTO);
                 addToService(newDTO);
+            }
             return SERVICE;
         }
     }

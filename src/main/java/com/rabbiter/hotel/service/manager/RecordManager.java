@@ -88,7 +88,7 @@ public class RecordManager {
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper);
 
-        if (pre_specificBill.getEndTime() != null) {
+        if (pre_specificBill==null||pre_specificBill.getEndTime() != null) {
             return;
         }
 
