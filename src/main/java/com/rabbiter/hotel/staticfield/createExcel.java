@@ -30,7 +30,7 @@ import org.apache.poi.xssf.usermodel.*;
  * @author hjq
  * @date: 2024/5/21
  * Description:
- * 三种使用场景：输出全部详单，输出用户详单，输出用户账单
+ * 三种使用场景：输出全部详单，输出用户详单，输出用户账单，输出用户空调账单
  */
 
 
@@ -82,7 +82,24 @@ public class createExcel {
 
     //按照用户将账单信息输出
     public static void writeByUserBill(int userId) {
-        String sql = "SELECT t_order.user_id, room.number AS RoomNumber, t_order.in_time AS CheckinTime, t_order.leave_time AS CheckoutTime, t_order.real_price AS AccommodationFee, bill.fee AS AirConditionerFee, (t_order.real_price + bill.fee) AS Total_Fee FROM (SELECT * FROM t_order WHERE user_id = " + userId + " ORDER BY id DESC LIMIT 1) AS t_order JOIN room ON t_order.room_id = room.id JOIN bill ON t_order.user_id = bill.user_id";
+
+        String sql = "SELECT " +
+                "t_order.user_id AS \"UserID\", " +
+                "room.number AS \"RoomNumber\", " +
+                "t_order.in_time AS \"CheckinTime\", " +
+                "t_order.leave_time AS \"CheckoutTime\", " +
+                "t_order.real_price AS \"Accommodation Fee\", " +
+                "sb.current_fee AS \"AirConditionerFee\", " +
+                "(t_order.real_price + sb.current_fee) AS \"Total Fee\" " +
+                "FROM " +
+                "(SELECT * FROM t_order WHERE user_id = " + userId + " ORDER BY id DESC LIMIT 1) AS t_order " +
+                "JOIN " +
+                "room ON t_order.room_id = room.id " +
+                "JOIN " +
+                "specific_bill sb ON sb.user_id = t_order.user_id " +
+                "WHERE " +
+                "sb.id = (SELECT id FROM specific_bill WHERE user_id = " + userId + " ORDER BY id DESC LIMIT 1)";
+
 
         try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
             Statement statement = connection.createStatement();
@@ -99,6 +116,44 @@ public class createExcel {
             e.printStackTrace();
         }
     }
+    //写空调账单
+    public static  void writeByUserConditionerBill(int userid){
+        String sql = "SELECT " +
+                "A.room_id AS room_id, " +
+                "(SELECT COUNT(*) FROM specific_bill WHERE user_id = A.user_id AND room_id = A.room_id) AS RecordCount, " +
+                "TIMESTAMPDIFF(SECOND, A.start_time, A.end_time) AS time_difference_in_seconds, " +
+                "A.current_fee AS TotalFee, " +
+                "A.user_id " +
+                "FROM " +
+                "(SELECT * FROM specific_bill WHERE user_id = "+userid+" ORDER BY id DESC LIMIT 1) AS A " ;
+
+
+
+
+        String path="excel_file/ConditionerBills.xlsx";
+        try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+
+            XSSFWorkbook workbook = getOrCreateWorkbook(path);
+
+            XSSFSheet sheet = getOrCreateSheetConditioner(workbook, userid + "CondoitionerBills");
+
+            writeResultSetToSheet(resultSet, sheet);
+
+            writeSheetToFile(sheet, workbook, path);
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+    }
+
+
 
     private static XSSFWorkbook getOrCreateWorkbook(String filePath) throws IOException {
         XSSFWorkbook workbook;
@@ -125,6 +180,24 @@ public class createExcel {
             headerRow.createCell(6).setCellValue("Wind Speed");
             headerRow.createCell(7).setCellValue("Current Fee");
             headerRow.createCell(8).setCellValue("Fee Rate");
+        } else {
+            // Clear existing data in the sheet
+            for (int i = sheet.getLastRowNum(); i >= 1; i--) {
+                sheet.removeRow(sheet.getRow(i));
+            }
+        }
+        return sheet;
+    }
+    private static XSSFSheet getOrCreateSheetConditioner(XSSFWorkbook workbook, String sheetName) {
+        XSSFSheet sheet = workbook.getSheet(sheetName);
+        if (sheet == null) {
+            sheet = workbook.createSheet(sheetName);
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("Room Number");
+            headerRow.createCell(1).setCellValue("Record Count");
+            headerRow.createCell(2).setCellValue("Total Service Time");
+            headerRow.createCell(3).setCellValue("Total Fee");
+            headerRow.createCell(4).setCellValue("User ID");
         } else {
             // Clear existing data in the sheet
             for (int i = sheet.getLastRowNum(); i >= 1; i--) {
