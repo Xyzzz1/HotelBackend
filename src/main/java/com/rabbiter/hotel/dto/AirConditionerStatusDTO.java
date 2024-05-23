@@ -16,7 +16,7 @@ public class AirConditionerStatusDTO {
 
     private Integer roomId;
     private Integer userId;
-    private boolean on;
+    private boolean powerOn;
     private Integer targetTemperature; //设定的温度
     private Integer windSpeed;
     private Integer additionalFee;
@@ -39,12 +39,12 @@ public class AirConditionerStatusDTO {
     }
 
     // 构造方法
-    public AirConditionerStatusDTO(Integer roomId, Integer userId, boolean on, Integer targetTemperature,
+    public AirConditionerStatusDTO(Integer roomId, Integer userId, boolean powerOn, Integer targetTemperature,
                                    Integer windSpeed, Integer additionalFee, Integer targetDuration,
                                    Date requestTime, Integer mode) {
         this.roomId = roomId;
         this.userId = userId;
-        this.on = on;
+        this.powerOn = powerOn;
         this.targetTemperature = targetTemperature;
         this.windSpeed = windSpeed;
         this.additionalFee = additionalFee;
@@ -69,12 +69,12 @@ public class AirConditionerStatusDTO {
         this.userId = userId;
     }
 
-    public boolean isOn() {
-        return on;
+    public boolean isPowerOn() {
+        return powerOn;
     }
 
-    public void setOn(boolean powerOn) {
-        this.on = powerOn;
+    public void setPowerOn(boolean powerOn) {
+        this.powerOn = powerOn;
     }
 
     public Integer getTargetTemperature() {
@@ -142,7 +142,7 @@ public class AirConditionerStatusDTO {
         return "AirConditionerStatusDTO{" +
                 "roomId=" + roomId +
                 ", userId=" + userId +
-                ", powerOn=" + on +
+                ", powerOn=" + powerOn +
                 ", targetTemperature=" + targetTemperature +
                 ", windSpeed=" + windSpeed +
                 ", additionalFee=" + additionalFee +

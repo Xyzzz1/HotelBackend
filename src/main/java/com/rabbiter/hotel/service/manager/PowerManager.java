@@ -25,7 +25,7 @@ public class PowerManager {
     private RecordManager recordManager;
 
     public void powerOn(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
-        airConditionerStatusDTO.setOn(true);
+        airConditionerStatusDTO.setPowerOn(true);
         airConditionerStatusDTO.setPowerOnTime(new Date());
         recordManager.powerOn(airConditionerStatusDTO);
         String message = createSSEMessage(airConditionerStatusDTO.getRoomId(), true, -1);
@@ -34,7 +34,7 @@ public class PowerManager {
     }
 
     public void powerOff(AirConditionerStatusDTO airConditionerStatusDTO, int reason) throws JSONException {
-        airConditionerStatusDTO.setOn(false);
+        airConditionerStatusDTO.setPowerOn(false);
         recordManager.powerOff(airConditionerStatusDTO, reason);
         String message = createSSEMessage(airConditionerStatusDTO.getRoomId(), false, reason);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomId()), message);
@@ -42,7 +42,7 @@ public class PowerManager {
     }
 
     public void waiting(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
-        airConditionerStatusDTO.setOn(true);
+        airConditionerStatusDTO.setPowerOn(true);
         recordManager.powerOff(airConditionerStatusDTO, 3);
         String message = createSSEMessage(airConditionerStatusDTO.getRoomId(), true, -3);
         SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomId()), message);
