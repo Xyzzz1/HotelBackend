@@ -37,7 +37,7 @@ public class AirConditionerController {
 
 
     @GetMapping(value = "/getRoomId")
-    public CommonResult<Integer> getRoomId(@RequestParam("userId") Integer userId) {
+    public CommonResult<Integer> getRoomId(@RequestParam(value = "userId", required = false) Integer userId) {
 
         CommonResult<Integer> commonResult = new CommonResult<>();
         if (userId == null) {
