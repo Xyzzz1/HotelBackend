@@ -75,13 +75,15 @@ public class AirConditionerController {
 
         commonResult.setData(airConditionerStatusDTO);
         if (airConditionerStatusDTO == null) {
-            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
-            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
+            AirConditionerStatusDTO nullDTO=new AirConditionerStatusDTO();
+            nullDTO.setPowerOn(false);
+            commonResult.setData(nullDTO);
         } else {
+            commonResult.setData(airConditionerStatusDTO);
             airConditionerStatusDTO.setReason(-3);
-            commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode()); //在等待队列
-            commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         }
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
         logger.info("/status: " + commonResult.toString());
         return commonResult;
     }
