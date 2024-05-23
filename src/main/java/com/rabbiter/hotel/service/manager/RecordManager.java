@@ -35,30 +35,30 @@ public class RecordManager {
      */
     public void powerOn(AirConditionerStatusDTO dto) {
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", dto.getUserID());
+        queryWrapper.eq("user_id", dto.getUserId());
         queryWrapper.orderByDesc("id");
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper); //最近的一条记录
 
         boolean success=false;
         if(pre_specificBill==null) { //此前没有详单记录
-            SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomID(),
+            SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomId(),
                     null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), 0f, 1f);
             success = specificBillService.save(specificBill);
         }else{
             QueryWrapper<Order> orderQueryWrapper = new QueryWrapper<>();
-            orderQueryWrapper.eq("user_id", dto.getUserID());
+            orderQueryWrapper.eq("user_id", dto.getUserId());
             orderQueryWrapper.eq("flag", 1);
             Order currentOrder = orderService.getOne(orderQueryWrapper);
 
             Date currentOrderDate=currentOrder.getCreateTime();
             if(pre_specificBill.getStartTime().getTime()<currentOrderDate.getTime()){ //对应记录是上一次的订单
-                SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomID(),
+                SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomId(),
                         null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), 0f, 1f);
                 success = specificBillService.save(specificBill);
             }else{
                 //更新current_fee
-                SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomID(),
+                SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomId(),
                         null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), pre_specificBill.getCurrentFee(), 1f);
                 success = specificBillService.save(specificBill);
             }
@@ -83,7 +83,7 @@ public class RecordManager {
         Date currentTime = new Date(); // 当前时间
 
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", dto.getUserID());
+        queryWrapper.eq("user_id", dto.getUserId());
         queryWrapper.orderByDesc("id");
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper);
@@ -120,7 +120,7 @@ public class RecordManager {
     public void updateAndAdd(AirConditionerStatusDTO dto) {
         Date currentTime = new Date(); // 当前时间
         QueryWrapper<SpecificBill> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", dto.getUserID());
+        queryWrapper.eq("user_id", dto.getUserId());
         queryWrapper.orderByDesc("id");
         queryWrapper.last("LIMIT 1");
 
@@ -141,7 +141,7 @@ public class RecordManager {
             System.out.println("更新失败");
         }
 
-        SpecificBill specificBill = new SpecificBill(null, dto.getUserID(), currentTime, currentTime, dto.getRoomID(),
+        SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), currentTime, currentTime, dto.getRoomId(),
                 null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), current_fee, 1f);
         boolean flag2 = specificBillService.save(specificBill);
         if (flag2) {

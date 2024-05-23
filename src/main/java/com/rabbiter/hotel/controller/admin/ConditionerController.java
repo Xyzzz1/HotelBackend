@@ -42,17 +42,17 @@ public class ConditionerController {
 
         List<Integer> serviceRoom=new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.serviceQueue) {
-            serviceRoom.add(airConditionerStatusDTO.getRoomID());
+            serviceRoom.add(airConditionerStatusDTO.getRoomId());
             returnList.add(airConditionerStatusDTO);
         }
 
         AirConditionerStatusDTO barrierDTO=new AirConditionerStatusDTO();
-        barrierDTO.setRoomID(-1); //区分等待还是服务的分隔
+        barrierDTO.setRoomId(-1); //区分等待还是服务的分隔
         returnList.add(barrierDTO);
 
         List<Integer> waitRoom=new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.waitQueue) {
-            waitRoom.add(airConditionerStatusDTO.getRoomID());
+            waitRoom.add(airConditionerStatusDTO.getRoomId());
             returnList.add(airConditionerStatusDTO);
         }
 

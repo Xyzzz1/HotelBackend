@@ -244,4 +244,34 @@ public class OrderController {
                 .body(fileSource);
     }
 
+
+    @GetMapping("/billExcel")
+    public ResponseEntity<FileSystemResource> billExcel(@RequestParam("userId") Integer userId){
+        CreateExcel.writeByUserBill(userId);
+        // 指定生成的文件路径
+        File file = new File("excel_file/bill.xlsx");
+        FileSystemResource fileSource = new FileSystemResource(file);
+
+        // 返回文件流
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileSource);
+    }
+
+    @GetMapping("/conditionerBillExcel")
+    public ResponseEntity<FileSystemResource> conditionerBillExcel(@RequestParam("userId") Integer userId){
+        CreateExcel.writeByUserConditionerBill(userId);
+        // 指定生成的文件路径
+        File file = new File("excel_file/conditionerBills.xlsx");
+        FileSystemResource fileSource = new FileSystemResource(file);
+
+        // 返回文件流
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileSource);
+    }
+
+
 }

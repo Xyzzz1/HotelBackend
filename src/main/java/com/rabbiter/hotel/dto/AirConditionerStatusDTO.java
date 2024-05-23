@@ -14,9 +14,9 @@ import java.util.Objects;
  */
 public class AirConditionerStatusDTO {
 
-    private Integer roomID;
-    private Integer userID;
-    private boolean powerOn;
+    private Integer roomId;
+    private Integer userId;
+    private boolean on;
     private Integer targetTemperature; //设定的温度
     private Integer windSpeed;
     private Integer additionalFee;
@@ -31,6 +31,7 @@ public class AirConditionerStatusDTO {
 
 
     private Integer mode;//0制热，1制冷
+    private Integer reason; //-1服务，-3等待
 
 
     public AirConditionerStatusDTO() {
@@ -38,12 +39,12 @@ public class AirConditionerStatusDTO {
     }
 
     // 构造方法
-    public AirConditionerStatusDTO(Integer roomID, Integer userID, boolean on, Integer targetTemperature,
+    public AirConditionerStatusDTO(Integer roomId, Integer userId, boolean on, Integer targetTemperature,
                                    Integer windSpeed, Integer additionalFee, Integer targetDuration,
                                    Date requestTime, Integer mode) {
-        this.roomID = roomID;
-        this.userID = userID;
-        this.powerOn = on;
+        this.roomId = roomId;
+        this.userId = userId;
+        this.on = on;
         this.targetTemperature = targetTemperature;
         this.windSpeed = windSpeed;
         this.additionalFee = additionalFee;
@@ -52,28 +53,28 @@ public class AirConditionerStatusDTO {
         this.mode = mode;
     }
 
-    public Integer getRoomID() {
-        return roomID;
+    public Integer getRoomId() {
+        return roomId;
     }
 
-    public void setRoomID(Integer roomID) {
-        this.roomID = roomID;
+    public void setRoomId(Integer roomId) {
+        this.roomId = roomId;
     }
 
-    public Integer getUserID() {
-        return userID;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUserID(Integer userID) {
-        this.userID = userID;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public boolean isPowerOn() {
-        return powerOn;
+    public boolean isOn() {
+        return on;
     }
 
-    public void setPowerOn(boolean powerOn) {
-        this.powerOn = powerOn;
+    public void setOn(boolean powerOn) {
+        this.on = powerOn;
     }
 
     public Integer getTargetTemperature() {
@@ -131,13 +132,17 @@ public class AirConditionerStatusDTO {
         return this.mode;
     }
 
+    public Integer getReason(){return this.reason;}
+
+    public void setReason(Integer reason){this.reason=reason;}
+
 
     @Override
     public String toString() {
         return "AirConditionerStatusDTO{" +
-                "roomID=" + roomID +
-                ", userID=" + userID +
-                ", powerOn=" + powerOn +
+                "roomId=" + roomId +
+                ", userId=" + userId +
+                ", powerOn=" + on +
                 ", targetTemperature=" + targetTemperature +
                 ", windSpeed=" + windSpeed +
                 ", additionalFee=" + additionalFee +
@@ -157,13 +162,13 @@ public class AirConditionerStatusDTO {
             return false;
         }
         AirConditionerStatusDTO other = (AirConditionerStatusDTO) obj;
-        return roomID == other.roomID &&
-                userID == other.userID &&
+        return roomId == other.roomId &&
+                userId == other.userId &&
                 Objects.equals(requestTime, other.requestTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomID, userID, requestTime);
+        return Objects.hash(roomId, userId, requestTime);
     }
 }

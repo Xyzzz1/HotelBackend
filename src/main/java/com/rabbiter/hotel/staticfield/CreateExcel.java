@@ -105,13 +105,13 @@ public class CreateExcel {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
-            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/bills.xlsx");
+            XSSFWorkbook workbook = getOrCreateWorkbook("excel_file/bill.xlsx");
 
-            XSSFSheet sheet = getOrCreateSheetBill(workbook, userId + "bills");
+            XSSFSheet sheet = getOrCreateSheetBill(workbook, userId + "bill");
 
             writeResultSetToSheet(resultSet, sheet);
 
-            writeSheetToFile(sheet, workbook, "excel_file/bills.xlsx");
+            writeSheetToFile(sheet, workbook, "excel_file/bill.xlsx");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
@@ -130,14 +130,14 @@ public class CreateExcel {
 
 
 
-        String path="excel_file/ConditionerBills.xlsx";
+        String path="excel_file/conditionerBills.xlsx";
         try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
             XSSFWorkbook workbook = getOrCreateWorkbook(path);
 
-            XSSFSheet sheet = getOrCreateSheetConditioner(workbook, userid + "CondoitionerBills");
+            XSSFSheet sheet = getOrCreateSheetConditioner(workbook, userid + "conditionerBills");
 
             writeResultSetToSheet(resultSet, sheet);
 

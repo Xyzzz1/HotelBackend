@@ -34,9 +34,9 @@ public class QueueTest {
         for(AirConditionerStatusDTO dto:dtoList){
             int result= queueManager.enQueue(dto);
             if(result== QueueManager.WAIT){
-                System.out.println("roomID"+dto.getRoomID()+": into wait queue");
+                System.out.println("roomID"+dto.getRoomId()+": into wait queue");
             }else{
-                System.out.println("roomID"+dto.getRoomID()+": into service queue");
+                System.out.println("roomID"+dto.getRoomId()+": into service queue");
             }
         }
 

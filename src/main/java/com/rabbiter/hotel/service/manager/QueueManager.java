@@ -48,7 +48,6 @@ public class QueueManager {
         int windSpeed = airConditionerStatusDTO.getWindSpeed();
         int lowestServiceQueueWindSpeed = getLowestServiceQueueWindSpeed();
         if (windSpeed < lowestServiceQueueWindSpeed) { //小于最低风速的情况，直接移入等待队列,不分配时间片
-            /*
             try {
                 semaphoreWait.acquire();
                 QueueDTO.waitQueue.add(airConditionerStatusDTO);
@@ -57,8 +56,6 @@ public class QueueManager {
             } finally {
                 semaphoreWait.release();
             }
-             */
-            addToWait(airConditionerStatusDTO);
             return WAIT;
         } else if (windSpeed > lowestServiceQueueWindSpeed) { //优先级调度
             AirConditionerStatusDTO removeDTO = priorityDispatch(airConditionerStatusDTO); //将被抢占的服务队列对象
@@ -110,7 +107,14 @@ public class QueueManager {
         int windSpeed = airConditionerStatusDTO.getWindSpeed();
         int lowestServiceQueueWindSpeed = getLowestServiceQueueWindSpeed();
         if (windSpeed < lowestServiceQueueWindSpeed) { //小于最低风速的情况，直接移入等待队列,不分配时间片
-            addToWait(airConditionerStatusDTO);
+            try {
+                semaphoreWait.acquire();
+                QueueDTO.waitQueue.add(airConditionerStatusDTO);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                semaphoreWait.release();
+            }
         } else if (windSpeed > lowestServiceQueueWindSpeed) { //优先级调度
             AirConditionerStatusDTO removeDTO = priorityDispatch(airConditionerStatusDTO); //将被抢占的服务队列对象
             removeFromService(removeDTO);
@@ -157,7 +161,7 @@ public class QueueManager {
                 }
 
                 //test
-                System.out.println("SERVICE" + dto.getRoomID() + ": time slice expire hit, current time:" + new Date());
+                System.out.println("SERVICE" + dto.getRoomId() + ": time slice expire hit, current time:" + new Date());
                 System.out.println("service queue: " + QueueDTO.serviceQueue);
                 System.out.println("wait queue: " + QueueDTO.waitQueue);
                 System.out.println(timerManager.getTimers().keySet());
@@ -187,7 +191,7 @@ public class QueueManager {
                 enQueueTask(dto);
 
                 //test
-                System.out.println("WAIT" + dto.getRoomID() + ": time slice expire hit, current time:" + new Date());
+                System.out.println("WAIT" + dto.getRoomId() + ": time slice expire hit, current time:" + new Date());
                 System.out.println("service queue: " + QueueDTO.serviceQueue);
                 System.out.println("wait queue: " + QueueDTO.waitQueue);
                 System.out.println(timerManager.getTimers().keySet());
@@ -393,7 +397,7 @@ public class QueueManager {
      */
     public boolean updateDuration(Integer roomId, Integer targetDuration) {
         for (AirConditionerStatusDTO updateDTO : QueueDTO.waitQueue) {
-            if (updateDTO.getRoomID() == roomId) {
+            if (updateDTO.getRoomId() == roomId) {
                 updateDTO.setTargetDuration(targetDuration);
                 recordManager.updateAndAdd(updateDTO);
                 return true;
@@ -401,7 +405,7 @@ public class QueueManager {
         }
 
         for (AirConditionerStatusDTO updateDTO : QueueDTO.serviceQueue) {
-            if (updateDTO.getRoomID() ==roomId) {
+            if (updateDTO.getRoomId() ==roomId) {
                 updateDTO.setTargetDuration(targetDuration);
                 recordManager.updateAndAdd(updateDTO);
                 timerManager.removeObject(updateDTO);

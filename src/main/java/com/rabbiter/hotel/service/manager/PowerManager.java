@@ -25,28 +25,28 @@ public class PowerManager {
     private RecordManager recordManager;
 
     public void powerOn(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
-        airConditionerStatusDTO.setPowerOn(true);
+        airConditionerStatusDTO.setOn(true);
         airConditionerStatusDTO.setPowerOnTime(new Date());
         recordManager.powerOn(airConditionerStatusDTO);
-        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -1);
-        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
-        logger.info("/power on: " + airConditionerStatusDTO.getRoomID());
+        String message = createSSEMessage(airConditionerStatusDTO.getRoomId(), true, -1);
+        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomId()), message);
+        logger.info("/power on: " + airConditionerStatusDTO.getRoomId());
     }
 
     public void powerOff(AirConditionerStatusDTO airConditionerStatusDTO, int reason) throws JSONException {
-        airConditionerStatusDTO.setPowerOn(false);
+        airConditionerStatusDTO.setOn(false);
         recordManager.powerOff(airConditionerStatusDTO, reason);
-        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), false, reason);
-        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
-        logger.info("/power off: " + airConditionerStatusDTO.getRoomID() + ", reason: " + reason);
+        String message = createSSEMessage(airConditionerStatusDTO.getRoomId(), false, reason);
+        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomId()), message);
+        logger.info("/power off: " + airConditionerStatusDTO.getRoomId() + ", reason: " + reason);
     }
 
     public void waiting(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
-        airConditionerStatusDTO.setPowerOn(true);
+        airConditionerStatusDTO.setOn(true);
         recordManager.powerOff(airConditionerStatusDTO, 3);
-        String message = createSSEMessage(airConditionerStatusDTO.getRoomID(), true, -3);
-        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomID()), message);
-        logger.info("/waiting: " + airConditionerStatusDTO.getRoomID());
+        String message = createSSEMessage(airConditionerStatusDTO.getRoomId(), true, -3);
+        SseEmitterServer.sendMessage(Integer.toString(airConditionerStatusDTO.getRoomId()), message);
+        logger.info("/waiting: " + airConditionerStatusDTO.getRoomId());
     }
 
 

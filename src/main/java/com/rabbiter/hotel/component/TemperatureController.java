@@ -37,21 +37,28 @@ public class TemperatureController {
     private RoomService roomService;
     private static final Logger logger = LoggerFactory.getLogger(SseEmitterServer.class);
 
-    private Map<Integer, Double> initIndoorTemp;
-    private Map<Integer, Double> indoorTemp;
+    private Map<Integer, Double> initIndoorTemp; //实时更新的初始房间及对应温度
+    private Map<Integer, Double> indoorTemp; //当前所有房间的温度
     private List<Integer> roomList;
 
     @Scheduled(cron = "*/10 * * * * ?")
     public void adjustTemperature() throws JSONException {
         //初始化
         initIndoorTemp = new HashMap<>();
-        indoorTemp = new HashMap<>();
         QueryWrapper<RoomTemp> tempQueryWrapper = new QueryWrapper<>();
         List<RoomTemp> roomTemperatureList = roomTempService.getBaseMapper().selectList(tempQueryWrapper);
         for (RoomTemp roomTemp : roomTemperatureList) {
             initIndoorTemp.put(roomTemp.getRoomID(), roomTemp.getInitTemp());
-            indoorTemp.put(roomTemp.getRoomID(), roomTemp.getInitTemp());
         }
+
+        if(indoorTemp==null){
+            indoorTemp = new HashMap<>();
+            for(Integer key:initIndoorTemp.keySet()){
+                indoorTemp.put(key,initIndoorTemp.get(key));
+            }
+        }
+
+
 
         QueryWrapper<Room> roomQueryWrapper = new QueryWrapper();
         roomQueryWrapper.eq("state", 1).select("id");
@@ -63,12 +70,12 @@ public class TemperatureController {
 
         List<Integer> serviceRoom = new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.serviceQueue) {
-            serviceRoom.add(airConditionerStatusDTO.getRoomID());
+            serviceRoom.add(airConditionerStatusDTO.getRoomId());
         }
 
         List<Integer> waitRoom = new ArrayList<>();
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.waitQueue) {
-            waitRoom.add(airConditionerStatusDTO.getRoomID());
+            waitRoom.add(airConditionerStatusDTO.getRoomId());
         }
 
         List<Integer> shutdownRoom = new ArrayList<>();
@@ -77,7 +84,7 @@ public class TemperatureController {
                 shutdownRoom.add(roomID);
         }
 
-        logger.info("init indoor temperature: " + indoorTemp);
+        logger.info("init indoor temperature: " + initIndoorTemp);
         logger.info("current indoor temperature: " + indoorTemp);
         logger.info("all using rooms: " + roomList);
         logger.info("service rooms: " + serviceRoom);
@@ -87,7 +94,7 @@ public class TemperatureController {
 
         //空调制冷或制热
         for (AirConditionerStatusDTO airConditionerStatusDTO : QueueDTO.serviceQueue) {
-            int roomID = airConditionerStatusDTO.getRoomID();
+            int roomID = airConditionerStatusDTO.getRoomId();
             if (indoorTemp.containsKey(roomID)) {
                 if (airConditionerStatusDTO.getMode() == 0 && airConditionerStatusDTO.getTargetTemperature() > indoorTemp.get(roomID))
                     //制热且空调设定温度大于室内温度
