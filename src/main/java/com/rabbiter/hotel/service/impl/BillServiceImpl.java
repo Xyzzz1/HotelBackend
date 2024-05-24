@@ -146,13 +146,35 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     private int calculateACCost(SpecificBill bill) {
+        // 计算总使用时间，以分钟为单位
         long duration = Duration.between(bill.getStartTime().toInstant(), bill.getEndTime().toInstant()).toMinutes();
-        long hours = (duration + 59) / 60; // 确保即使不足一小时也按一小时计费
-        int baseCost = 1; // 默认温度下的基本成本
-        int temperatureCost = Math.abs(bill.getTemperature() - 25); // 温度调整费用
-        int windCost = bill.getWindSpeed(); // 风速成本
 
-        int totalCostPerHour = baseCost + temperatureCost + windCost;
-        return (int) (totalCostPerHour * hours);
+        // 计算温度调整费用，每度1元
+        int temperatureCost = Math.abs(bill.getTemperature() - 25) * (int) duration;
+
+        // 计算风速费用
+        int windCostPerMinute;
+        switch (bill.getWindSpeed()) {
+            case 3:
+                windCostPerMinute = 1; // 高风速：1度/分钟
+                break;
+            case 2:
+                windCostPerMinute = 1 / 2; // 中风速：1度/2分钟（缺省风速）
+                break;
+            case 1:
+                windCostPerMinute = 1 / 3; // 低风速：1度/3分钟
+                break;
+            default:
+                windCostPerMinute = 1 / 2; // 默认中风速
+                break;
+        }
+
+        // 根据风速计算总风速费用
+        int windCost = (int) (duration * windCostPerMinute);
+
+        // 计算总费用
+        int totalCost = temperatureCost + windCost;
+        return totalCost;
     }
+
 }
