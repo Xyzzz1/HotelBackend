@@ -141,12 +141,13 @@ public class RoomController {
         BeanUtils.copyProperties(bookDTO, order);
         order.setUserId(user.getId());
         order.setFlag(1); //已经办理入住
+        order.setLeaveTime(order.getInTime()); //刚开始离店=入住时间
 
 
-        int days = (int) Math.ceil((bookDTO.getLeaveTime().getTime() - bookDTO.getInTime().getTime()) / (60 * 60 * 24 * 1000 * 1.0));
+        //int days = (int) Math.ceil((bookDTO.getLeaveTime().getTime() - bookDTO.getInTime().getTime()) / (60 * 60 * 24 * 1000 * 1.0));
         // System.out.println(days);
 
-        order.setRealPrice(type.getPrice() * days);
+        order.setRealPrice((double)0); //刚开始为0
         // System.out.println(order);
 
         orderService.save(order);

@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rabbiter.hotel.common.CommonResult;
 import com.rabbiter.hotel.common.ConstantCode;
 import com.rabbiter.hotel.common.StatusCode;
-import com.rabbiter.hotel.domain.Order;
-import com.rabbiter.hotel.domain.SpecificBill;
-import com.rabbiter.hotel.domain.User;
+import com.rabbiter.hotel.domain.*;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
+import com.rabbiter.hotel.service.RoomService;
+import com.rabbiter.hotel.service.TypeService;
 import com.rabbiter.hotel.service.manager.QueueManager;
 import com.rabbiter.hotel.service.OrderService;
 import com.rabbiter.hotel.sse.SseEmitterServer;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
+import java.util.Calendar;
 import java.util.Date;
 
 @RestController
@@ -34,6 +35,12 @@ public class AirConditionerController {
 
     @Resource
     private OrderService orderService;
+
+    @Resource
+    private TypeService typeService;
+
+    @Resource
+    private RoomService roomService;
 
 
     @GetMapping(value = "/getRoomId")
@@ -75,7 +82,7 @@ public class AirConditionerController {
 
         commonResult.setData(airConditionerStatusDTO);
         if (airConditionerStatusDTO == null) {
-            AirConditionerStatusDTO nullDTO=new AirConditionerStatusDTO();
+            AirConditionerStatusDTO nullDTO = new AirConditionerStatusDTO();
             nullDTO.setPowerOn(false);
             commonResult.setData(nullDTO);
         } else {
@@ -92,11 +99,7 @@ public class AirConditionerController {
     @PostMapping(value = "/turnOn")
     public CommonResult<String> turnOn(@RequestBody AirConditionerStatusDTO airConditionerStatusDTO) {
         System.out.println(airConditionerStatusDTO.toString());
-        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("room_id", airConditionerStatusDTO.getRoomId());
-        queryWrapper.orderByDesc("id");
-        queryWrapper.last("LIMIT 1");
-        Order order = orderService.getOne(queryWrapper); //最近的一条订单记录
+        Order order = getLatestOrder(airConditionerStatusDTO.getRoomId());
         System.out.println(order.toString());
 
         airConditionerStatusDTO.setUserId(order.getUserId());
@@ -171,6 +174,24 @@ public class AirConditionerController {
                 return commonResult;
             }
         }
+
+
+        Order order = getLatestOrder(roomID);
+        Date currentLeaveData = order.getLeaveTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentLeaveData);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        order.setLeaveTime(calendar.getTime());//离店日期加一天
+
+        QueryWrapper<Room> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", roomID);
+        Room room = roomService.getOne(queryWrapper);
+        Type type = typeService.getById(room.getType());
+
+        order.setRealPrice(order.getRealPrice() + type.getPrice()); //加一天的房价
+        QueryWrapper<Order> orderQueryWrapper = new QueryWrapper();
+        orderQueryWrapper.eq("id", order.getId());
+        orderService.update(order, orderQueryWrapper);
 
         if (queueManager.deQueue(airConditionerStatusDTO, 2) == QueueManager.WAIT)
             commonResult.setData("已从等待队列中移除。");
@@ -255,6 +276,16 @@ public class AirConditionerController {
         }
 
         return commonResult;
+    }
+
+    private Order getLatestOrder(Integer roomId) {
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("room_id", roomId);
+        queryWrapper.eq("flag", 1);
+        queryWrapper.orderByDesc("id");
+        queryWrapper.last("LIMIT 1");
+        Order order = orderService.getOne(queryWrapper); //最近的一条订单记录
+        return order;
     }
 
 

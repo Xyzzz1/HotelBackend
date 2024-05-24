@@ -29,7 +29,7 @@ public class QueueManager {
     private final Semaphore semaphoreTask = new Semaphore(1);
 
     private final TimerManager timerManager = new TimerManager();
-    private RecordManager recordManager=new RecordManager();
+    private RecordManager recordManager = new RecordManager();
 
     @Resource
     private PowerManager powerManager;
@@ -109,18 +109,12 @@ public class QueueManager {
         int windSpeed = airConditionerStatusDTO.getWindSpeed();
         int lowestServiceQueueWindSpeed = getLowestServiceQueueWindSpeed();
         if (windSpeed < lowestServiceQueueWindSpeed) { //小于最低风速的情况，直接移入等待队列,不分配时间片
-            try {
-                semaphoreWait.acquire();
-                QueueDTO.waitQueue.add(airConditionerStatusDTO);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                semaphoreWait.release();
-            }
+            ;//do nothing
         } else if (windSpeed > lowestServiceQueueWindSpeed) { //优先级调度
             AirConditionerStatusDTO removeDTO = priorityDispatch(airConditionerStatusDTO); //将被抢占的服务队列对象
             removeFromService(removeDTO);
             addToWait(removeDTO);
+            removeFromWait(airConditionerStatusDTO);
             addToService(airConditionerStatusDTO);
         } else { //轮询调度
             AirConditionerStatusDTO seizedDTO = null;
@@ -395,7 +389,6 @@ public class QueueManager {
 
     /**
      * 更新空调对象的用户设定的时间，需要考虑-1的情况，以及在等待/服务队列
-     *
      */
     public boolean updateDuration(Integer roomId, Integer targetDuration) {
         for (AirConditionerStatusDTO updateDTO : QueueDTO.waitQueue) {
@@ -407,12 +400,12 @@ public class QueueManager {
         }
 
         for (AirConditionerStatusDTO updateDTO : QueueDTO.serviceQueue) {
-            if (updateDTO.getRoomId() ==roomId) {
+            if (updateDTO.getRoomId() == roomId) {
                 updateDTO.setTargetDuration(targetDuration);
                 recordManager.updateAndAdd(updateDTO);
                 timerManager.removeObject(updateDTO);
                 long delay = Long.MAX_VALUE;
-                if (targetDuration!= -1) //考虑没有设置定时器的情况
+                if (targetDuration != -1) //考虑没有设置定时器的情况
                     delay = targetDuration / Configuration.timeChangeRate;
                 timerManager.addObjectWithTimer(updateDTO, delay, TimeUnit.SECONDS, taskForService(updateDTO));
                 return true;
