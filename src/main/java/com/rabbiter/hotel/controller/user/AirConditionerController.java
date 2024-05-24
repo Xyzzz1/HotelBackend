@@ -175,7 +175,6 @@ public class AirConditionerController {
             }
         }
 
-
         Order order = getLatestOrder(roomID);
         Date currentLeaveData = order.getLeaveTime();
         Calendar calendar = Calendar.getInstance();
@@ -229,8 +228,9 @@ public class AirConditionerController {
     @PostMapping(value = "/adjustTargetDuration")
     public CommonResult<String> adjustTargetDuration(@RequestParam("targetDuration") Integer targetDuration, @RequestParam("roomId") Integer roomId) {
         CommonResult<String> commonResult = new CommonResult<>();
-
-        if (queueManager.updateDuration(roomId, targetDuration)) {
+        AirConditionerStatusDTO updateDTO= queueManager.updateDuration(roomId, targetDuration);
+        if (updateDTO!=null) {
+            recordManager.updateAndAdd(updateDTO);
             commonResult.setData("调整运行时间成功！");
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());

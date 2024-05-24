@@ -166,19 +166,12 @@ public class RecordManager {
      * @return
      */
     private float calFee(SpecificBill preSpecificBill) {
-        System.out.println("cal fee hit!");
-        System.out.println(preSpecificBill.toString());
         long startTimeMillis = preSpecificBill.getStartTime().getTime();
         long endTimeMillis = preSpecificBill.getEndTime().getTime();
-        System.out.println(endTimeMillis-startTimeMillis);
         int durationInSeconds = (int) ((endTimeMillis - startTimeMillis) / 1000.0);
-        System.out.println(durationInSeconds);
 
         int duration = durationInSeconds * Configuration.timeChangeRate;
-        System.out.println(duration);
         int minutes = (duration + 59) / 60; //不足一分钟当一分钟算
-        System.out.println(minutes);
-
         if (preSpecificBill.getWindSpeed() == 3) {
             return roundToTwoVector((float) minutes * preSpecificBill.getFeeRate());
         } else if (preSpecificBill.getWindSpeed() == 2) {

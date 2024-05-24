@@ -1,14 +1,22 @@
 package com.rabbiter.hotel.service.manager;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rabbiter.hotel.common.Configuration;
 import com.rabbiter.hotel.component.TimerManager;
+import com.rabbiter.hotel.domain.Order;
+import com.rabbiter.hotel.domain.Room;
+import com.rabbiter.hotel.domain.Type;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
+import com.rabbiter.hotel.service.OrderService;
+import com.rabbiter.hotel.service.RoomService;
+import com.rabbiter.hotel.service.TypeService;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -33,6 +41,15 @@ public class QueueManager {
 
     @Resource
     private PowerManager powerManager;
+
+    @Resource
+    private OrderService orderService;
+
+    @Resource
+    private TypeService typeService;
+
+    @Resource
+    private RoomService roomService;
 
     /**
      * 提出服务请求时的调度策略
@@ -147,6 +164,25 @@ public class QueueManager {
                 removeFromService(dto);
                 try {
                     powerManager.powerOff(dto, 1);
+
+                    Order order = getLatestOrder(dto.getRoomId());
+                    Date currentLeaveData = order.getLeaveTime();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(currentLeaveData);
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                    order.setLeaveTime(calendar.getTime());//离店日期加一天
+
+                    QueryWrapper<Room> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("id", dto.getRoomId());
+                    Room room = roomService.getOne(queryWrapper);
+                    Type type = typeService.getById(room.getType());
+
+                    order.setRealPrice(order.getRealPrice() + type.getPrice()); //加一天的房价
+                    QueryWrapper<Order> orderQueryWrapper = new QueryWrapper();
+                    orderQueryWrapper.eq("id", order.getId());
+                    orderService.update(order, orderQueryWrapper);
+
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -390,29 +426,37 @@ public class QueueManager {
     /**
      * 更新空调对象的用户设定的时间，需要考虑-1的情况，以及在等待/服务队列
      */
-    public boolean updateDuration(Integer roomId, Integer targetDuration) {
+    public AirConditionerStatusDTO updateDuration(Integer roomId, Integer targetDuration) {
         for (AirConditionerStatusDTO updateDTO : QueueDTO.waitQueue) {
             if (updateDTO.getRoomId() == roomId) {
                 updateDTO.setTargetDuration(targetDuration);
-                recordManager.updateAndAdd(updateDTO);
-                return true;
+                return updateDTO;
             }
         }
 
         for (AirConditionerStatusDTO updateDTO : QueueDTO.serviceQueue) {
             if (updateDTO.getRoomId() == roomId) {
                 updateDTO.setTargetDuration(targetDuration);
-                recordManager.updateAndAdd(updateDTO);
                 timerManager.removeObject(updateDTO);
                 long delay = Long.MAX_VALUE;
                 if (targetDuration != -1) //考虑没有设置定时器的情况
                     delay = targetDuration / Configuration.timeChangeRate;
                 timerManager.addObjectWithTimer(updateDTO, delay, TimeUnit.SECONDS, taskForService(updateDTO));
-                return true;
+                return updateDTO;
             }
         }
 
-        return false;
+        return null;
+    }
+
+    private Order getLatestOrder(Integer roomId) {
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("room_id", roomId);
+        queryWrapper.eq("flag", 1);
+        queryWrapper.orderByDesc("id");
+        queryWrapper.last("LIMIT 1");
+        Order order = orderService.getOne(queryWrapper); //最近的一条订单记录
+        return order;
     }
 
 }

@@ -138,7 +138,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
             introduces.put(strs[0], strs[1]);
         }
 
-        returnRoomDTO.setIntroduces(introduces);
+        returnRoomDTO.setIntroduce(introduces);
 
         return returnRoomDTO;
     }
