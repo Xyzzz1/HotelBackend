@@ -40,23 +40,23 @@ public class RecordManager {
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper); //最近的一条记录
 
-        boolean success=false;
-        if(pre_specificBill==null) { //此前没有详单记录
+        boolean success = false;
+        if (pre_specificBill == null) { //此前没有详单记录
             SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomId(),
                     null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), 0f, 1f);
             success = specificBillService.save(specificBill);
-        }else{
+        } else {
             QueryWrapper<Order> orderQueryWrapper = new QueryWrapper<>();
             orderQueryWrapper.eq("user_id", dto.getUserId());
             orderQueryWrapper.eq("flag", 1);
             Order currentOrder = orderService.getOne(orderQueryWrapper);
 
-            Date currentOrderDate=currentOrder.getCreateTime();
-            if(pre_specificBill.getStartTime().getTime()<currentOrderDate.getTime()){ //对应记录是上一次的订单
+            Date currentOrderDate = currentOrder.getCreateTime();
+            if (pre_specificBill.getStartTime().getTime() < currentOrderDate.getTime()) { //对应记录是上一次的订单
                 SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomId(),
                         null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), 0f, 1f);
                 success = specificBillService.save(specificBill);
-            }else{
+            } else {
                 //更新current_fee
                 SpecificBill specificBill = new SpecificBill(null, dto.getUserId(), dto.getRequestTime(), dto.getPowerOnTime(), dto.getRoomId(),
                         null, dto.getWindSpeed(), dto.getTargetTemperature(), dto.getTargetDuration(), null, dto.getAdditionalFee(), pre_specificBill.getCurrentFee(), 1f);
@@ -88,7 +88,7 @@ public class RecordManager {
         queryWrapper.last("LIMIT 1");
         SpecificBill pre_specificBill = specificBillService.getOne(queryWrapper);
 
-        if (pre_specificBill==null||pre_specificBill.getEndTime() != null) {
+        if (pre_specificBill == null || pre_specificBill.getEndTime() != null) {
             return;
         }
 
@@ -125,6 +125,11 @@ public class RecordManager {
         queryWrapper.last("LIMIT 1");
 
         SpecificBill update = specificBillService.getOne(queryWrapper);
+
+        if (update == null) {
+            return; //此时还没有开始服务，即使改了属性也不插入新记录
+        }
+
         if (update.getEndTime() != null)//服务完毕
             return;
 
@@ -161,9 +166,12 @@ public class RecordManager {
      * @return
      */
     private float calFee(SpecificBill preSpecificBill) {
-        int duration = (int) (preSpecificBill.getEndTime().getTime() - preSpecificBill.getStartTime().getTime()) * Configuration.timeChangeRate / 1000; //总秒数
-        int minutes = (duration + 59) / 60;
+        long startTimeMillis = preSpecificBill.getStartTime().getTime();
+        long endTimeMillis = preSpecificBill.getEndTime().getTime();
+        int durationInSeconds = (int) ((endTimeMillis - startTimeMillis) / 1000.0);
 
+        int duration = durationInSeconds * Configuration.timeChangeRate;
+        int minutes = (duration + 59) / 60; //不足一分钟当一分钟算
         if (preSpecificBill.getWindSpeed() == 3) {
             return roundToTwoVector((float) minutes * preSpecificBill.getFeeRate());
         } else if (preSpecificBill.getWindSpeed() == 2) {

@@ -14,17 +14,17 @@ public class ReturnRoomDTO {
     private Integer id;
     private String number;
     private Integer maxPeople;
-    private Map<String, String> introduces;
+    private Map<String, String> introduce;
     private Type type;
 
     public ReturnRoomDTO() {
     }
 
-    public ReturnRoomDTO(Integer id, String number, Integer maxPeople, Map<String, String> introduces, Type type) {
+    public ReturnRoomDTO(Integer id, String number, Integer maxPeople, Map<String, String> introduce, Type type) {
         this.id = id;
         this.number = number;
         this.maxPeople = maxPeople;
-        this.introduces = introduces;
+        this.introduce = introduce;
         this.type = type;
     }
 
@@ -52,12 +52,12 @@ public class ReturnRoomDTO {
         this.maxPeople = maxPeople;
     }
 
-    public Map<String, String> getIntroduces() {
-        return introduces;
+    public Map<String, String> getintroduce() {
+        return introduce;
     }
 
-    public void setIntroduces(Map<String, String> introduces) {
-        this.introduces = introduces;
+    public void setIntroduce(Map<String, String> introduce) {
+        this.introduce = introduce;
     }
 
     public Type getType() {
@@ -74,7 +74,7 @@ public class ReturnRoomDTO {
                 "id=" + id +
                 ", number='" + number + '\'' +
                 ", maxPeople=" + maxPeople +
-                ", introduces=" + introduces +
+                ", introduce=" + introduce +
                 ", type=" + type +
                 '}';
     }

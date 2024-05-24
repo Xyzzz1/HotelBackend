@@ -36,42 +36,6 @@ public class RoomController {
     @Resource
     private UserService userService;
 
-    @PostMapping(value = "/listAllSpareRoom")
-    public CommonResult<List<ReturnRoomDTO>> listRoom(@RequestBody SearchRoomDTO searchRoomDTO) {
-        CommonResult<List<ReturnRoomDTO>> commonResult = new CommonResult<>();
-        DateSectionDTO dateSectionDTO = new DateSectionDTO(searchRoomDTO.getInTime(), searchRoomDTO.getLeaveTime());
-        List<ReturnRoomDTO> list = roomService.listRooms(dateSectionDTO);
-
-        String roomType = searchRoomDTO.getRoomType();
-        int maxPeople = searchRoomDTO.getMaxPeople();
-        int minPrice = searchRoomDTO.getMinPrice();
-        int maxPrice = searchRoomDTO.getMaxPrice();
-
-        Iterator<ReturnRoomDTO> iterator = list.iterator();
-        while (iterator.hasNext()) {
-            ReturnRoomDTO returnRoom = iterator.next();
-            if (!roomType.equals("") && !returnRoom.getType().getTypeName().equals(roomType)) {
-                iterator.remove();
-                continue;
-            }
-            if (returnRoom.getMaxPeople() < maxPeople) {
-                iterator.remove();
-                continue;
-            }
-            if (minPrice != -1 && returnRoom.getType().getPrice() < minPrice) {
-                iterator.remove();
-                continue;
-            }
-            if (maxPrice != -1 && returnRoom.getType().getPrice() > maxPrice) {
-                iterator.remove();
-                continue;
-            }
-        }
-        commonResult.setData(list);
-        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
-        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
-        return commonResult;
-    }
 
     @GetMapping(value = "/listRoom")
     public CommonResult<List<ReturnRoomDTO>> listRoom() {
@@ -115,51 +79,6 @@ public class RoomController {
         return commonResult;
     }
 
-
-    @PostMapping("/bookRoom")
-    public CommonResult<String> bookRoom(@RequestBody BookDTO bookDTO) {
-        CommonResult<String> commonResult = new CommonResult<>();
-
-
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("phone",bookDTO.getPhone());
-        User user=userService.getBaseMapper().selectOne(queryWrapper);
-
-        if (user == null) {
-            commonResult.setData("不存在该用户!");
-            commonResult.setCode(StatusCode.COMMON_FAIL.getCode());
-            commonResult.setMessage(StatusCode.COMMON_FAIL.getMessage());
-            return commonResult;
-        }
-
-        Room room =roomService.getById(bookDTO.getRoomId());
-        room.setState(1);
-        roomService.updateById(room);
-
-        Type type = typeService.getById(room.getType());
-        Order order = new Order();
-        BeanUtils.copyProperties(bookDTO, order);
-        order.setUserId(user.getId());
-        order.setFlag(1); //已经办理入住
-
-
-        int days = (int) Math.ceil((bookDTO.getLeaveTime().getTime() - bookDTO.getInTime().getTime()) / (60 * 60 * 24 * 1000 * 1.0));
-        // System.out.println(days);
-
-        order.setRealPrice(type.getPrice() * days);
-        // System.out.println(order);
-
-        orderService.save(order);
-
-        user.setState(1);
-        userService.updateById(user);
-
-        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
-        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
-        commonResult.setData("预订成功!");
-
-        return commonResult;
-    }
 
     @PostMapping("/listRoomsByTypeId")
     public CommonResult<List<ReturnRoomDTO>> listRoomsByTypeId(@RequestBody TypeDTO typeDTO) {

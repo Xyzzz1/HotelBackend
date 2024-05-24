@@ -1,6 +1,7 @@
 package com.rabbiter.hotel.component;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.rabbiter.hotel.common.Configuration;
 import com.rabbiter.hotel.domain.Room;
 import com.rabbiter.hotel.domain.RoomTemp;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
@@ -98,10 +99,10 @@ public class TemperatureController {
             if (indoorTemp.containsKey(roomID)) {
                 if (airConditionerStatusDTO.getMode() == 0 && airConditionerStatusDTO.getTargetTemperature() > indoorTemp.get(roomID))
                     //制热且空调设定温度大于室内温度
-                    indoorTemp.put(roomID, indoorTemp.get(roomID) + 0.5);
+                    indoorTemp.put(roomID, indoorTemp.get(roomID) + Configuration.temperatureChangeRate);
                 else if (airConditionerStatusDTO.getMode() == 1 && airConditionerStatusDTO.getTargetTemperature() < indoorTemp.get(roomID))
                     //制冷且空调设定温度小于室内温度
-                    indoorTemp.put(roomID, indoorTemp.get(roomID) - 0.5);
+                    indoorTemp.put(roomID, indoorTemp.get(roomID) - Configuration.temperatureChangeRate);
 
                 //发送sse通知前端
                 String message = createSSEMessage(indoorTemp.get(roomID));
@@ -131,9 +132,9 @@ public class TemperatureController {
 
     private void warmUp(Integer roomID) throws JSONException {
         if (indoorTemp.get(roomID) < initIndoorTemp.get(roomID)) {
-            indoorTemp.put(roomID, indoorTemp.get(roomID) + 0.5);
+            indoorTemp.put(roomID, indoorTemp.get(roomID) + Configuration.temperatureChangeRate);
         } else if (indoorTemp.get(roomID) > initIndoorTemp.get(roomID))
-            indoorTemp.put(roomID, indoorTemp.get(roomID) - 0.5);
+            indoorTemp.put(roomID, indoorTemp.get(roomID) - Configuration.temperatureChangeRate);
 
         //发送sse通知前端
         String message = createSSEMessage(indoorTemp.get(roomID));

@@ -1,7 +1,12 @@
 package com.rabbiter.hotel.service.manager;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.rabbiter.hotel.domain.Order;
 import com.rabbiter.hotel.dto.AirConditionerStatusDTO;
 import com.rabbiter.hotel.dto.QueueDTO;
+import com.rabbiter.hotel.service.OrderService;
+import com.rabbiter.hotel.service.RoomService;
+import com.rabbiter.hotel.service.TypeService;
 import com.rabbiter.hotel.sse.SseEmitterServer;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -23,6 +29,9 @@ public class PowerManager {
 
     @Resource
     private RecordManager recordManager;
+
+    @Resource
+    private OrderService orderService;
 
     public void powerOn(AirConditionerStatusDTO airConditionerStatusDTO) throws JSONException {
         airConditionerStatusDTO.setPowerOn(true);
@@ -75,5 +84,16 @@ public class PowerManager {
         obj.put("reason", reason);
 
         return obj.toString();
+    }
+
+
+    private Order getLatestOrder(Integer roomId) {
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("room_id", roomId);
+        queryWrapper.eq("flag", 1);
+        queryWrapper.orderByDesc("id");
+        queryWrapper.last("LIMIT 1");
+        Order order = orderService.getOne(queryWrapper); //最近的一条订单记录
+        return order;
     }
 }

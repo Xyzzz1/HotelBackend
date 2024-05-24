@@ -7,6 +7,7 @@ import com.rabbiter.hotel.domain.*;
 import com.rabbiter.hotel.service.*;
 import com.rabbiter.hotel.staticfield.CreateExcel;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -231,46 +232,70 @@ public class OrderController {
     }
 
     @GetMapping("/specificBillExcel")
-    public ResponseEntity<FileSystemResource> specificBillExcel(@RequestParam("userId") Integer userId){
+    public ResponseEntity<InputStreamResource> specificBillExcel(@RequestParam("userId") Integer userId) throws FileNotFoundException {
         CreateExcel.writeUserSpecificBill(userId);
         // 指定生成的文件路径
         File file = new File("excel_file/specificBill.xlsx");
-        FileSystemResource fileSource = new FileSystemResource(file);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        InputStreamResource inputStreamResource = new InputStreamResource(fileInputStream);
 
-        // 返回文件流
-        return ResponseEntity.ok()
+
+        // 返回文件流响应
+        ResponseEntity<InputStreamResource> responseEntity = ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(fileSource);
+                .contentLength(file.length())
+                .body(inputStreamResource);
+
+        // 删除文件
+        file.delete();
+
+        return responseEntity;
     }
 
 
     @GetMapping("/billExcel")
-    public ResponseEntity<FileSystemResource> billExcel(@RequestParam("userId") Integer userId){
+    public ResponseEntity<InputStreamResource> billExcel(@RequestParam("userId") Integer userId) throws FileNotFoundException {
         CreateExcel.writeByUserBill(userId);
         // 指定生成的文件路径
         File file = new File("excel_file/bill.xlsx");
-        FileSystemResource fileSource = new FileSystemResource(file);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        InputStreamResource inputStreamResource = new InputStreamResource(fileInputStream);
 
-        // 返回文件流
-        return ResponseEntity.ok()
+
+        // 返回文件流响应
+        ResponseEntity<InputStreamResource> responseEntity = ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(fileSource);
+                .contentLength(file.length())
+                .body(inputStreamResource);
+
+        // 删除文件
+        file.delete();
+
+        return responseEntity;
     }
 
     @GetMapping("/conditionerBillExcel")
-    public ResponseEntity<FileSystemResource> conditionerBillExcel(@RequestParam("userId") Integer userId){
+    public ResponseEntity<InputStreamResource> conditionerBillExcel(@RequestParam("userId") Integer userId) throws FileNotFoundException {
         CreateExcel.writeByUserConditionerBill(userId);
         // 指定生成的文件路径
         File file = new File("excel_file/conditionerBills.xlsx");
-        FileSystemResource fileSource = new FileSystemResource(file);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        InputStreamResource inputStreamResource = new InputStreamResource(fileInputStream);
 
-        // 返回文件流
-        return ResponseEntity.ok()
+
+        // 返回文件流响应
+        ResponseEntity<InputStreamResource> responseEntity = ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(fileSource);
+                .contentLength(file.length())
+                .body(inputStreamResource);
+
+        // 删除文件
+        file.delete();
+
+        return responseEntity;
     }
 
 
