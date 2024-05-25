@@ -46,6 +46,8 @@ public class AirConditionerController {
     @GetMapping(value = "/getRoomId")
     public CommonResult<Integer> getRoomId(@RequestParam(value = "userId", required = false) Integer userId) {
 
+        System.out.println(userId);
+
         CommonResult<Integer> commonResult = new CommonResult<>();
         if (userId == null) {
             User user = (User) WebUtils.getSession().getAttribute("loginUser");

@@ -211,4 +211,14 @@ public class UserController {
         return commonResult;
     }
 
+
+    @GetMapping(path = "/userDetail")
+    public CommonResult<User> getUserId() {
+        CommonResult<User> commonResult = new CommonResult<>();
+        User user = (User) WebUtils.getSession().getAttribute("loginUser");
+        commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
+        commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
+        commonResult.setData(user);
+        return commonResult;
+    }
 }
