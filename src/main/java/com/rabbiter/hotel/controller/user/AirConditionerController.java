@@ -203,7 +203,7 @@ public class AirConditionerController {
     }
 
 
-    @GetMapping(value = "/subscribe")
+    @GetMapping(value = "/sse/subscribe")
     public SseEmitter subscribe(@RequestParam("roomId") Integer roomID) {
         return SseEmitterServer.connect(Integer.toString(roomID));
     }

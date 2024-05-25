@@ -63,11 +63,10 @@ public class UserController {
         queryWrapper.eq("password", md5Password);
         User user = userService.getBaseMapper().selectOne(queryWrapper);
 
-        if (null != user) {
+        if (user != null) {
 
             WebUtils.getSession().setAttribute("loginUser", user);
 //            System.out.println(WebUtils.getSession().getId());
-
             commonResult.setCode(StatusCode.COMMON_SUCCESS.getCode());
             commonResult.setMessage(StatusCode.COMMON_SUCCESS.getMessage());
             commonResult.setData("登录成功");
@@ -89,7 +88,7 @@ public class UserController {
         queryWrapper.eq("phone", loginDTO.getPhone());
         User user = userService.getBaseMapper().selectOne(queryWrapper);
 
-        if (null != user) {
+        if (user != null) {
 
             WebUtils.getSession().setAttribute("loginUser", user);
 //            System.out.println(WebUtils.getSession().getId());
